@@ -1,0 +1,14 @@
+# Run
+1. clearTAGEclassfiles
+2. buildTAGE
+3. compile
+4. run
+
+# Building JAVA DOCS
+
+
+# Assets
+
+# Contributers
+Shayn Voon
+Kenny Yang
