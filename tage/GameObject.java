@@ -399,4 +399,31 @@ public class GameObject
 			Engine.getEngine().getRenderSystem().addTexture((TextureImage)this);
 		}
 	}
+
+	/** Used to turn the Dolphin side to side (Can produce roll)*/
+	public void yaw(float angle) {
+		Vector4f oldUp;
+		Matrix4f rotAroundAvatarUp, newRotation, oldRotation;
+
+		oldRotation = getWorldRotation();
+		oldUp = new Vector4f(0f, angle, 0f, 1f);
+		rotAroundAvatarUp = new Matrix4f().rotation(-.005f, new Vector3f(oldUp.x(), oldUp.y(), oldUp.z()));
+		newRotation = oldRotation;
+		newRotation.mul(rotAroundAvatarUp);
+		setLocalRotation(newRotation);
+	}
+
+	/** Used to turn the Dolphin up and down (Can produce roll)*/
+	public void pitch(float angle){
+		Vector4f oldUp;
+		Matrix4f rotAroundAvatarUp, newRotation, oldRotation;
+
+		oldRotation = getWorldRotation();
+		oldUp = new Vector4f(angle, 0f, 0f, 1f);
+		rotAroundAvatarUp = new Matrix4f().rotation(-.005f, new Vector3f(oldUp.x(), oldUp.y(), oldUp.z()));
+		newRotation = oldRotation;
+		newRotation.mul(rotAroundAvatarUp);
+		setLocalRotation(newRotation);
+	}
+
 }
