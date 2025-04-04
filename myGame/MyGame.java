@@ -69,8 +69,6 @@ public class MyGame extends VariableFrameRateGame {
 		dolS = new ImportedModel("dolphinHighPoly.obj");
 		ghostS = new Sphere();
 		sphS = new Sphere();
-		pyrS = new Cube();
-		torS = new Torus(0.5f, 0.2f, 48);
 		linxS = new Line(new Vector3f(0f, 0f, 0f), new Vector3f(3f, 0f, 0f));
 		linyS = new Line(new Vector3f(0f, 0f, 0f), new Vector3f(0f, 3f, 0f));
 		linzS = new Line(new Vector3f(0f, 0f, 0f), new Vector3f(0f, 0f, 3f));
@@ -98,21 +96,6 @@ public class MyGame extends VariableFrameRateGame {
 		initialScale = (new Matrix4f()).scaling(0.5f);
 		sun.setLocalTranslation((initialTranslation));
 		sun.setLocalScale(initialScale);
-
-		earth = new GameObject(GameObject.root(), pyrS);
-		initialTranslation = new Matrix4f().translation(-1, 0, 0);
-		earth.setLocalTranslation(initialTranslation);
-		earth.setParent(sun);
-		earth.propagateTranslation(true);
-		earth.propagateRotation(false);
-
-		moon = new GameObject(GameObject.root(), torS);
-		initialTranslation = new Matrix4f().translation(0, 1, 0);
-		moon.setLocalTranslation(initialTranslation);
-		moon.setParent(earth);
-		moon.propagateTranslation(true);
-		moon.propagateRotation(false);
-		moon.getRenderStates().setTiling(1);
 
 		//add X, Y, -Z axes
 		x = new GameObject(GameObject.root(), linxS);
@@ -173,19 +156,9 @@ public class MyGame extends VariableFrameRateGame {
 	}
 
 	@Override
-	public void update() {    // rotate dolphin if not paused
-		/*lastFrameTime = currFrameTime;
-		currFrameTime = System.currentTimeMillis();
-		if (!paused) elapsTime += (currFrameTime - lastFrameTime) / 1000.0;
-		dol.setLocalRotation((new Matrix4f()).rotation((float)elapsTime, 0, 1, 0));*/
+	public void update() {    
 		elapsTime = System.currentTimeMillis() - lastFrameTime;
 		lastFrameTime = System.currentTimeMillis();
-		//amt = elapsTime * 0.03;
-
-		amtt += 0.01f;
-		Matrix4f currentTranslation = earth.getLocalTranslation();
-		currentTranslation.translation((float) Math.sin(amtt) * 2.0f, 0.0f, (float) Math.cos(amtt) * 2.0f);
-		earth.setLocalTranslation(currentTranslation);
 
 		// build and set HUD
 		int elapsTimeSec = Math.round((float) elapsTime);
