@@ -12,6 +12,8 @@ import java.util.UUID;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import tage.networking.IGameConnection.ProtocolType;
+
+//test
 import java.lang.Math;
 import java.awt.*;
 import java.awt.event.*;
@@ -34,9 +36,6 @@ public class MyGame extends VariableFrameRateGame {
 	private GameObject dol, sun, earth, moon, x, y, z;
 	private ObjShape dolS, sphS, pyrS, torS, linxS, linyS, linzS, ghostS;
 	private TextureImage doltx, ghostT;
-	private GameObject dol, lava, ground;
-	private ObjShape dolS, lavaS, groundS;
-	private TextureImage doltx, lavaTx, groundTx;
 	private Light light1;
 
 	private String serverAddress;
@@ -57,10 +56,6 @@ public class MyGame extends VariableFrameRateGame {
 		else
 			this.serverProtocol = ProtocolType.UDP;
 	}
-	//skybox 
-	private int dungeonWalls;
-
-	public MyGame() { super(); }
 
 	public static void main(String[] args) {
 		MyGame game = new MyGame(args[0], Integer.parseInt(args[1]), args[2]);
@@ -126,31 +121,6 @@ public class MyGame extends VariableFrameRateGame {
 		(x.getRenderStates()).setColor(new Vector3f(1f, 0f, 0f));
 		(y.getRenderStates()).setColor(new Vector3f(0f, 1f, 0f));
 		(z.getRenderStates()).setColor(new Vector3f(0f, 0f, 1f));
-	public void loadShapes()
-	{	
-		lavaS = new TerrainPlane(1000);
-	}
-
-	@Override
-	public void loadTextures()
-	{	
-		lavaTx = new TextureImage("10001.png");
-		groundTx = new TextureImage();
-	}
-
-	@Override
-	public void buildObjects()
-	{	
-		Matrix4f initialTranslation, initialScale;
-		// build terrain
-		lava = new GameObject(GameObject.root(), lavaS, lavaTx);
-		initialTranslation = new Matrix4f().tranlsation(0f,0f,0f);
-		lava.setLocalTranslation(initialTranslation);
-		initialScale = new Matrix4f().scaling(20.0f, 1.0f, 20.0f);
-		lava.setLocalScale(initialScale);
-		
-		lava.setHeightMap(heightMap);
->>>>>>> main
 	}
 
 	@Override
@@ -248,22 +218,6 @@ public class MyGame extends VariableFrameRateGame {
 
 	public GameObject getDol() {
 		return dol;
-=======
-	}
-
-	@Override
-	public void loadSkyBoxes() {
-		dungeonWalls = engine.getSceneGraph().loadCubeMap("dungeonWalls");
-		engine.getSceneGraph().setActiveSkyBoxTexture(dungeonWalls);
-		engine.getSceneGraph().setSkyBoxEnabled(true);
-		
-	}
-
-	@Override
-	public void update()
-	{	
-
->>>>>>> main
 	}
 
 	@Override
