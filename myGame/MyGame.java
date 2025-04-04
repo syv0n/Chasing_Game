@@ -43,6 +43,7 @@ public class MyGame extends VariableFrameRateGame {
 	private ProtocolType serverProtocol;
 	private ProtocolClient protClient;
 	private boolean isClientConnected = false;
+	private int fluffyClouds;
 
 	private float amtt = 0.0f;
 
@@ -78,6 +79,13 @@ public class MyGame extends VariableFrameRateGame {
 	public void loadTextures() {
 		doltx = new TextureImage("Dolphin_HighPolyUV.png");
 		ghostT = new TextureImage("redDolphin.jpg");
+	}
+
+	@Override
+	public void loadSkyBoxes() {
+		fluffyClouds = engine.getSceneGraph().loadCubeMap("fluffyClouds");
+		engine.getSceneGraph().setActiveSkyBoxTexture(fluffyClouds);
+		engine.getSceneGraph().setSkyBoxEnabled(true);
 	}
 
 	@Override
