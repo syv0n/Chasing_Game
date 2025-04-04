@@ -2,7 +2,6 @@ package myGame;
 
 import tage.*;
 import tage.shapes.*;
-//test
 import java.lang.Math;
 import java.awt.*;
 import java.awt.event.*;
@@ -18,11 +17,14 @@ public class MyGame extends VariableFrameRateGame
 	private int counter=0;
 	private double lastFrameTime, currFrameTime, elapsTime;
 
-	private GameObject dol, sun, earth, moon;
-	private ObjShape dolS, sphS, pyrS, torS;
-	private TextureImage doltx;
+	private GameObject dol, lava, ground;
+	private ObjShape dolS, lavaS, groundS;
+	private TextureImage doltx, lavaTx, groundTx;
 	private Light light1;
 	private float amtt = 0.0f;
+
+	//skybox 
+	private int dungeonWalls;
 
 	public MyGame() { super(); }
 
@@ -35,51 +37,29 @@ public class MyGame extends VariableFrameRateGame
 
 	@Override
 	public void loadShapes()
-	{	dolS = new ImportedModel("dolphinHighPoly.obj");
-		sphS = new Sphere();
-		pyrS = new Cube();
-		torS = new Torus();
+	{	
+		lavaS = new TerrainPlane(1000);
 	}
 
 	@Override
 	public void loadTextures()
-	{	doltx = new TextureImage("Dolphin_HighPolyUV.png");
+	{	
+		lavaTx = new TextureImage("10001.png");
+		groundTx = new TextureImage();
 	}
 
 	@Override
 	public void buildObjects()
-	{	Matrix4f initialTranslation, initialScale;
-
-		sun = new GameObject(GameObject.root(), sphS);
-		initialTranslation = new Matrix4f().translation(0,0,0);
-		initialScale = new Matrix4f().scaling(0.5f);
-		sun.setLocalTranslation((initialTranslation));
-		sun.setLocalScale(initialScale);
-
-		earth = new GameObject(GameObject.root(), pyrS);
-		initialTranslation = new Matrix4f().translation(-1,0,0);
-		earth.setLocalTranslation(initialTranslation);
-		earth.setParent(sun);
-		earth.propagateTranslation(true);
-		earth.propagateRotation(false);
-
-		moon = new GameObject(GameObject.root(), torS);
-		initialTranslation = new Matrix4f().translation(0,1,0);
-		moon.setLocalTranslation(initialTranslation);
-		moon.setParent(earth);
-		moon.propagateTranslation(true);
-		moon.propagateRotation(false);
-		moon.getRenderStates().setTiling(1);
-
-
-		// build dolphin in the center of the window
-		dol = new GameObject(GameObject.root(), dolS, doltx);
-		dol.setParent(earth);
-		dol.propagateTranslation(true);
-		dol.propagateRotation(true);
-		dol.applyParentRotationToPosition(true);
-		initialScale = new Matrix4f().scaling(0.1f);
-		dol.setLocalScale(initialScale);
+	{	
+		Matrix4f initialTranslation, initialScale;
+		// build terrain
+		lava = new GameObject(GameObject.root(), lavaS, lavaTx);
+		initialTranslation = new Matrix4f().tranlsation(0f,0f,0f);
+		lava.setLocalTranslation(initialTranslation);
+		initialScale = new Matrix4f().scaling(20.0f, 1.0f, 20.0f);
+		lava.setLocalScale(initialScale);
+		
+		lava.setHeightMap(heightMap);
 	}
 
 	@Override
@@ -97,33 +77,20 @@ public class MyGame extends VariableFrameRateGame
 		elapsTime = 0.0;
 		(engine.getRenderSystem()).setWindowDimensions(1900,1000);
 
-		// ------------- positioning the camera -------------
-		(engine.getRenderSystem().getViewport("MAIN").getCamera()).setLocation(new Vector3f(0,0,5));
+	}
+
+	@Override
+	public void loadSkyBoxes() {
+		dungeonWalls = engine.getSceneGraph().loadCubeMap("dungeonWalls");
+		engine.getSceneGraph().setActiveSkyBoxTexture(dungeonWalls);
+		engine.getSceneGraph().setSkyBoxEnabled(true);
+		
 	}
 
 	@Override
 	public void update()
-	{	// rotate dolphin if not paused
-		lastFrameTime = currFrameTime;
-		currFrameTime = System.currentTimeMillis();
-		/*if (!paused) elapsTime += (currFrameTime - lastFrameTime) / 1000.0;
-		dol.setLocalRotation((new Matrix4f()).rotation((float)elapsTime, 0, 1, 0));
-		*/
-		amtt += 0.01f;
-		Matrix4f currentTranslation = earth.getLocalTranslation();
-		currentTranslation.translation((float)Math.sin(amtt)*2.0f, 0.0f, (float)Math.cos(amtt)*2.0f);
-		earth.setLocalTranslation(currentTranslation);
+	{	
 
-		// build and set HUD
-		int elapsTimeSec = Math.round((float)elapsTime);
-		String elapsTimeStr = Integer.toString(elapsTimeSec);
-		String counterStr = Integer.toString(counter);
-		String dispStr1 = "Time = " + elapsTimeStr;
-		String dispStr2 = "Keyboard hits = " + counterStr;
-		Vector3f hud1Color = new Vector3f(1,0,0);
-		Vector3f hud2Color = new Vector3f(0,0,1);
-		(engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, 15, 15);
-		(engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, 500, 15);
 	}
 
 	@Override
