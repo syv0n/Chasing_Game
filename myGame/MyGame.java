@@ -33,9 +33,9 @@ public class MyGame extends VariableFrameRateGame {
 
 	private double lastFrameTime, currFrameTime, elapsTime;
 
-	private GameObject dol, sun, earth, moon, x, y, z;
-	private ObjShape dolS, sphS, pyrS, torS, linxS, linyS, linzS, ghostS;
-	private TextureImage doltx, ghostT;
+	private GameObject dol, sun, earth, moon, x, y, z, lava;
+	private ObjShape dolS, sphS, pyrS, torS, linxS, linyS, linzS, ghostS, lavaS;
+	private TextureImage doltx, ghostT, lavatx;
 	private Light light1;
 
 	private String serverAddress;
@@ -73,12 +73,15 @@ public class MyGame extends VariableFrameRateGame {
 		linxS = new Line(new Vector3f(0f, 0f, 0f), new Vector3f(3f, 0f, 0f));
 		linyS = new Line(new Vector3f(0f, 0f, 0f), new Vector3f(0f, 3f, 0f));
 		linzS = new Line(new Vector3f(0f, 0f, 0f), new Vector3f(0f, 0f, 3f));
+
+		lavaS = new TerrainPlane(1000);
 	}
 
 	@Override
 	public void loadTextures() {
 		doltx = new TextureImage("Dolphin_HighPolyUV.png");
 		ghostT = new TextureImage("redDolphin.jpg");
+		lavatx = new TextureImage("10001.png");
 	}
 
 	@Override
@@ -112,6 +115,16 @@ public class MyGame extends VariableFrameRateGame {
 		(x.getRenderStates()).setColor(new Vector3f(1f, 0f, 0f));
 		(y.getRenderStates()).setColor(new Vector3f(0f, 1f, 0f));
 		(z.getRenderStates()).setColor(new Vector3f(0f, 0f, 1f));
+
+		//build terrain
+		lava = new GameObject(GameObject.root(), lavaS, lavatx);
+		initialTranslation = new Matrix4f().translation(0f,0f,0f);
+		lava.setLocalTranslation(initialTranslation);
+		initialScale = new Matrix4f().scaling(20.0f, 1.0f, 20.0f);
+		lava.setLocalScale(initialScale);
+		
+		lava.getRenderStates().setTiling(1);
+		lava.getRenderStates().setTileFactor(10);
 	}
 
 	@Override
