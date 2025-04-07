@@ -33,9 +33,9 @@ public class MyGame extends VariableFrameRateGame {
 
 	private double lastFrameTime, currFrameTime, elapsTime;
 
-	private GameObject dol, sun, earth, moon, x, y, z, lava;
-	private ObjShape dolS, sphS, pyrS, torS, linxS, linyS, linzS, ghostS, lavaS;
-	private TextureImage doltx, ghostT, lavatx;
+	private GameObject dol, sun, earth, moon, x, y, z, lava, demon;
+	private ObjShape dolS, sphS, pyrS, torS, linxS, linyS, linzS, ghostS, lavaS, demonS;
+	private TextureImage doltx, ghostT, lavatx, heightmap, demontx;
 	private Light light1;
 
 	private String serverAddress;
@@ -68,6 +68,7 @@ public class MyGame extends VariableFrameRateGame {
 	@Override
 	public void loadShapes() {
 		dolS = new ImportedModel("dolphinHighPoly.obj");
+		demonS = new ImportedModel("demon.obj");
 		ghostS = new Sphere();
 		sphS = new Sphere();
 		linxS = new Line(new Vector3f(0f, 0f, 0f), new Vector3f(3f, 0f, 0f));
@@ -82,18 +83,20 @@ public class MyGame extends VariableFrameRateGame {
 		doltx = new TextureImage("Dolphin_HighPolyUV.png");
 		ghostT = new TextureImage("redDolphin.jpg");
 		lavatx = new TextureImage("10001.png");
+		heightmap = new TextureImage("testheightmap.png");
+		demontx = new TextureImage("demon.png");
 	}
 
 	@Override
 	public void loadSkyBoxes() {
-		fluffyClouds = engine.getSceneGraph().loadCubeMap("fluffyClouds");
+		fluffyClouds = engine.getSceneGraph().loadCubeMap("dungeonWalls");
 		engine.getSceneGraph().setActiveSkyBoxTexture(fluffyClouds);
 		engine.getSceneGraph().setSkyBoxEnabled(true);
 	}
 
 	@Override
 	public void buildObjects() {
-		Matrix4f initialTranslation, initialScale;
+		Matrix4f initialTranslation, initialScale, initialRotation;
 
 		// build dolphin in the center of the window
 		dol = new GameObject(GameObject.root(), dolS, doltx);
@@ -122,9 +125,17 @@ public class MyGame extends VariableFrameRateGame {
 		lava.setLocalTranslation(initialTranslation);
 		initialScale = new Matrix4f().scaling(20.0f, 1.0f, 20.0f);
 		lava.setLocalScale(initialScale);
+		lava.setHeightMap(heightmap);
 		
 		lava.getRenderStates().setTiling(1);
 		lava.getRenderStates().setTileFactor(10);
+
+		// demon chaser
+		demon = new GameObject(GameObject.root(), demonS, demontx);
+		initialScale = new Matrix4f().scaling(1f,1f,1f);
+		initialTranslation = new Matrix4f().translation(0f,4f,0f);
+		demon.setLocalScale(initialScale);
+		demon.setLocalTranslation(initialTranslation);
 	}
 
 	@Override
