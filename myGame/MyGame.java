@@ -205,6 +205,11 @@ public class MyGame extends VariableFrameRateGame {
 		(engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, 500, 15);
 		im.update((float) elapsTime);
 		positionCameraBehind();
+
+		Vector3f loc = dol.getWorldLocation();
+		float height = lava.getHeight(loc.x(), loc.z());
+		dol.setLocalLocation(new Vector3f(loc.x(), height, loc.z()));
+
 		processNetworking((float)elapsTime);
 	}
 
