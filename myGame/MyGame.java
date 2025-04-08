@@ -33,9 +33,9 @@ public class MyGame extends VariableFrameRateGame {
 
 	private double lastFrameTime, currFrameTime, elapsTime;
 
-	private GameObject dol, sun, earth, moon, x, y, z, lava, demon;
-	private ObjShape dolS, sphS, pyrS, torS, linxS, linyS, linzS, ghostS, lavaS, demonS;
-	private TextureImage doltx, ghostT, lavatx, heightmap, demontx;
+	private GameObject dol, sun, earth, moon, x, y, z, lava, demon, dragon;
+	private ObjShape dolS, sphS, pyrS, torS, linxS, linyS, linzS, ghostS, lavaS, demonS, dragonS;
+	private TextureImage doltx, ghostT, lavatx, heightmap, demontx, dragontx;
 	private Light light1;
 
 	private String serverAddress;
@@ -70,6 +70,7 @@ public class MyGame extends VariableFrameRateGame {
 	public void loadShapes() {
 		dolS = new ImportedModel("dolphinHighPoly.obj");
 		demonS = new ImportedModel("demon2.obj");
+		dragonS = new ImportedModel("DragonFolk.obj");
 		ghostS = new Sphere();
 		sphS = new Sphere();
 		linxS = new Line(new Vector3f(0f, 0f, 0f), new Vector3f(3f, 0f, 0f));
@@ -86,6 +87,7 @@ public class MyGame extends VariableFrameRateGame {
 		lavatx = new TextureImage("10001.png");
 		heightmap = new TextureImage("testheightmap.png");
 		demontx = new TextureImage("demon2.png");
+		dragontx = new TextureImage("DragonFolk.png");
 	}
 
 	@Override
@@ -137,6 +139,12 @@ public class MyGame extends VariableFrameRateGame {
 		initialTranslation = new Matrix4f().translation(0f,0f,0f);
 		demon.setLocalScale(initialScale);
 		demon.setLocalTranslation(initialTranslation);
+
+		dragon = new GameObject(GameObject.root(), dragonS, dragontx);
+		initialScale = (new Matrix4f()).scaling(0.4f);
+		initialTranslation = new Matrix4f().translation(5f, 2f, 3f);
+		dragon.setLocalScale(initialScale);
+		dragon.setLocalTranslation(initialTranslation);
 	}
 
 	@Override
