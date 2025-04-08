@@ -43,7 +43,8 @@ public class MyGame extends VariableFrameRateGame {
 	private ProtocolType serverProtocol;
 	private ProtocolClient protClient;
 	private boolean isClientConnected = false;
-	private int fluffyClouds;
+	//skybox
+	private int hellscape;
 
 	private float amtt = 0.0f;
 
@@ -89,8 +90,8 @@ public class MyGame extends VariableFrameRateGame {
 
 	@Override
 	public void loadSkyBoxes() {
-		fluffyClouds = engine.getSceneGraph().loadCubeMap("dungeonWalls");
-		engine.getSceneGraph().setActiveSkyBoxTexture(fluffyClouds);
+		hellscape = engine.getSceneGraph().loadCubeMap("dungeonWalls");
+		engine.getSceneGraph().setActiveSkyBoxTexture(hellscape);
 		engine.getSceneGraph().setSkyBoxEnabled(true);
 	}
 
