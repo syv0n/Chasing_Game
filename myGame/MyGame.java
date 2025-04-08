@@ -134,7 +134,7 @@ public class MyGame extends VariableFrameRateGame {
 		// demon chaser
 		demon = new GameObject(GameObject.root(), demonS, demontx);
 		initialScale = new Matrix4f().scaling(1f,1f,1f);
-		initialTranslation = new Matrix4f().translation(0f,4f,0f);
+		initialTranslation = new Matrix4f().translation(0f,0f,0f);
 		demon.setLocalScale(initialScale);
 		demon.setLocalTranslation(initialTranslation);
 	}
@@ -220,6 +220,21 @@ public class MyGame extends VariableFrameRateGame {
 		cam.setV(up);
 		cam.setN(fwd);
 		cam.setLocation(loc.add(up.mul(1.3f)).add(fwd.mul(-2.5f)));
+	}
+
+	// CAMERA POV of AVATAR/PLAYER
+	private void povCamera() {
+
+	}
+
+	// CAMERA positioned to look behind player
+	private void lookBackCamera() {
+
+	}
+
+	// CAMERA follows skybox
+	private void overViewCamera() {
+
 	}
 
 	public GameObject getDol() {
