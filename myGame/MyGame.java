@@ -68,7 +68,7 @@ public class MyGame extends VariableFrameRateGame {
 	@Override
 	public void loadShapes() {
 		dolS = new ImportedModel("dolphinHighPoly.obj");
-		demonS = new ImportedModel("demon.obj");
+		demonS = new ImportedModel("demon2.obj");
 		ghostS = new Sphere();
 		sphS = new Sphere();
 		linxS = new Line(new Vector3f(0f, 0f, 0f), new Vector3f(3f, 0f, 0f));
@@ -84,7 +84,7 @@ public class MyGame extends VariableFrameRateGame {
 		ghostT = new TextureImage("redDolphin.jpg");
 		lavatx = new TextureImage("10001.png");
 		heightmap = new TextureImage("testheightmap.png");
-		demontx = new TextureImage("demon.png");
+		demontx = new TextureImage("demon2.png");
 	}
 
 	@Override
