@@ -33,10 +33,11 @@ public class MyGame extends VariableFrameRateGame {
 
 	private double lastFrameTime, currFrameTime, elapsTime;
 
-	private GameObject dol, sun, earth, moon, x, y, z, lava, demon, dragon;
-	private ObjShape dolS, sphS, pyrS, torS, linxS, linyS, linzS, ghostS, lavaS, demonS, dragonS;
-	private TextureImage doltx, ghostT, lavatx, heightmap, demontx, dragontx;
+	private GameObject dol, sun, earth, moon, x, y, z, lava, dragon, person;
+	private ObjShape dolS, sphS, pyrS, torS, linxS, linyS, linzS, ghostS, lavaS, dragonS;
+	private TextureImage doltx, ghostT, lavatx, heightmap, dragontx, persontx;
 	private Light light1;
+	private AnimatedShape personS;
 
 	private String serverAddress;
 	private int serverPort;
@@ -69,8 +70,11 @@ public class MyGame extends VariableFrameRateGame {
 	@Override
 	public void loadShapes() {
 		dolS = new ImportedModel("dolphinHighPoly.obj");
-		demonS = new ImportedModel("demon2.obj");
 		dragonS = new ImportedModel("DragonFolk.obj");
+		personS = new AnimatedShape("person.rkm", "person.rks");
+		personS.loadAnimation("WAVE", "wave.rka");
+
+
 		ghostS = new Sphere();
 		sphS = new Sphere();
 		linxS = new Line(new Vector3f(0f, 0f, 0f), new Vector3f(3f, 0f, 0f));
@@ -86,8 +90,8 @@ public class MyGame extends VariableFrameRateGame {
 		ghostT = new TextureImage("redDolphin.jpg");
 		lavatx = new TextureImage("10001.png");
 		heightmap = new TextureImage("testheightmap.png");
-		demontx = new TextureImage("demon2.png");
 		dragontx = new TextureImage("DragonFolk.png");
+		persontx = new TextureImage("person.png");
 	}
 
 	@Override
@@ -133,18 +137,17 @@ public class MyGame extends VariableFrameRateGame {
 		lava.getRenderStates().setTiling(1);
 		lava.getRenderStates().setTileFactor(10);
 
-		// demon chaser
-		demon = new GameObject(GameObject.root(), demonS, demontx);
-		initialScale = new Matrix4f().scaling(1f,1f,1f);
-		initialTranslation = new Matrix4f().translation(0f,0f,0f);
-		demon.setLocalScale(initialScale);
-		demon.setLocalTranslation(initialTranslation);
-
 		dragon = new GameObject(GameObject.root(), dragonS, dragontx);
 		initialScale = (new Matrix4f()).scaling(0.4f);
 		initialTranslation = new Matrix4f().translation(5f, 2f, 3f);
 		dragon.setLocalScale(initialScale);
 		dragon.setLocalTranslation(initialTranslation);
+
+		person = new GameObject(GameObject.root(), personS, persontx);
+		initialScale = new Matrix4f().scaling(1f,1f,1f);
+		initialTranslation = new Matrix4f().translation(0f,0f,0f);
+		person.setLocalScale(initialScale);
+		person.setLocalTranslation(initialTranslation);
 	}
 
 	@Override
@@ -200,6 +203,7 @@ public class MyGame extends VariableFrameRateGame {
 	public void update() {    
 		elapsTime = System.currentTimeMillis() - lastFrameTime;
 		lastFrameTime = System.currentTimeMillis();
+		personS.updateAnimation();
 
 		// build and set HUD
 		int elapsTimeSec = Math.round((float) elapsTime);
@@ -274,6 +278,14 @@ public class MyGame extends VariableFrameRateGame {
 				Matrix4f newRotation = oldRotation;
 				newRotation.mul(rotAroundAvatarUp);
 				dol.setLocalRotation(newRotation);
+				break;
+			}
+			case KeyEvent.VK_A: {
+				personS.playAnimation("WAVE", 0.5f, AnimatedShape.EndType.LOOP, 0);
+				break;
+			}
+			case KeyEvent.VK_Z: {
+				personS.stopAnimation();
 				break;
 			}
 		}
