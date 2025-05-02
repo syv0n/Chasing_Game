@@ -8,7 +8,9 @@ public class NetworkingServer
 	private NPCcontroller npcCtrl;
 
 	public NetworkingServer(int serverPort, String protocol) 
-	{	try 
+	{	
+		npcCtrl = new NPCcontroller();
+		try 
 		{	if(protocol.toUpperCase().compareTo("TCP") == 0)
 			{	thisTCPServer = new GameServerTCP(serverPort);
 			}
