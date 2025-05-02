@@ -105,7 +105,11 @@ public class ProtocolClient extends GameConnectionClient
             }
 
             if (messageTokens[0].compareTo("mnpc") == 0) {
-                Vector3f newPosition = new Vector3f(Float.parseFloat(messageTokens[1], Float.parseFloat(messageTokens[2]), Float.parseFloat(messageTokens[3])));
+                float x = Float.parseFloat(messageTokens[1]);
+                float y = Float.parseFloat(messageTokens[2]);
+                float z = Float.parseFloat(messageTokens[3]);
+
+                Vector3f newPosition = new Vector3f(x, y, z);
                 double size = Double.parseDouble(messageTokens[4]);
                 updateGhostNPC(newPosition, size);
             }
