@@ -83,11 +83,27 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	}	}	}
 
 	public void sendNPCinfo() {
-
+		try {
+			NPC npc = npcCtrl.getNPC();
+			String message = new String("mnpc");
+			message += "," + npc.getX();
+			message += "," + npc.getY();
+			message += "," + npc.getZ();
+			message += "," + npc.getSize();
+			sendPacketToAll(message);
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void sendNPCstart(UUID clientID) {
-
+		try {
+			NPC npc = npcCtrl.getNPC();
+			String message = "createNPC," + npc.getX() + ", " + npc.getY() + ", " + npc.getZ() + ", " + npc.getSize();
+			sendPacket(message, clientID);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void sendCheckForAvatarNear() {

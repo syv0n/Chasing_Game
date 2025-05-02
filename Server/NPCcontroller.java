@@ -51,12 +51,14 @@ public class NPCcontroller {
             float elapsedTickMilliSecs = (currentTime - lastTickUpdateTime) / 1000000.0f;
             // TICK
             if (elapsedTickMilliSecs >= 25.0f) {
+                lastTickUpdateTime = currentTime;
                 npc.updateLocation();
                 server.sendNPCinfo();
             }
 
             // THINK
             if (elapsedThinkMilliSecs >= 250.0f) {
+                lastThinkUpdateTime = currentTime;
                 bt.update(elapsedThinkMilliSecs);
             }
             Thread.yield();
