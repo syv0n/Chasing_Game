@@ -4,6 +4,7 @@ import tage.*;
 import tage.shapes.*;
 import tage.input.*;
 import tage.input.action.*;
+import tage.audio.*;
 
 import net.java.games.input.*;
 import net.java.games.input.Component.Identifier.*;
@@ -116,7 +117,7 @@ public class MyGame extends VariableFrameRateGame {
 		dol.setLocalScale(initialScale);
 
 		sun = new GameObject(GameObject.root(), sphS);
-		initialTranslation = (new Matrix4f()).translation(1, 0, 1);
+		initialTranslation = (new Matrix4f()).translation(5, 1, 5);
 		initialScale = (new Matrix4f()).scaling(0.5f);
 		sun.setLocalTranslation((initialTranslation));
 		sun.setLocalScale(initialScale);
