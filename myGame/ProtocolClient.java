@@ -202,7 +202,7 @@ public class ProtocolClient extends GameConnectionClient
     // Ghost NPC
     private void createGhostNPC(Vector3f position) throws IOException {
         if(ghostNPC == null) {
-            ghostNPC = new GhostNPC(0, game.getGhostShape(), game.getGhostTexture(), position);
+            ghostNPC = new GhostNPC(0, game.getNPCshape(), game.getNPCtexture(), position);
         }
     }
     private void updateGhostNPC(Vector3f position, double gsize) {
