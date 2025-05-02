@@ -5,10 +5,13 @@ import java.util.UUID;
 import tage.networking.server.GameConnectionServer;
 import tage.networking.server.IClientInfo;
 
+
 public class GameServerUDP extends GameConnectionServer<UUID> 
 {
-	public GameServerUDP(int localPort) throws IOException 
+	NPCcontroller npcCtrl;
+	public GameServerUDP(int localPort, NPCcontroller npc) throws IOException 
 	{	super(localPort, ProtocolType.UDP);
+		npcCtrl = npc;
 	}
 
 	@Override
@@ -59,6 +62,17 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 				String[] pos = {messageTokens[3], messageTokens[4], messageTokens[5]};
 				sendDetailsForMessage(clientID, remoteID, pos);
 			}
+
+			if(messageTokens[0].compareTo("needNPC") == 0) {
+				System.out.println("server got a needNPC message");
+				UUID clientID = UUID.fromString(messageTokens[1]);
+				sendNPCstart(clientID);
+			}
+
+			if(messageTokens[0].compareTo("isNear") == 0) {
+				UUID clientID = UUID.fromString(messageTokens[1]);
+				handleNearTiming(clientID);
+			}
 			
 			// MOVE --- Case where server receives a move message
 			// Received Message Format: (move,localId,x,y,z)
@@ -67,6 +81,14 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 				String[] pos = {messageTokens[2], messageTokens[3], messageTokens[4]};
 				sendMoveMessages(clientID, pos);
 	}	}	}
+
+	public void sendNPCinfo() {
+
+	}
+
+	public void sendNPCstart(UUID clientID) {
+
+	}
 
 	// Informs the client who just requested to join the server if their if their 
 	// request was able to be granted. 
@@ -85,6 +107,23 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 		catch (IOException e) 
 		{	e.printStackTrace();
 	}	}
+
+	public void handleNearTiming(UUID clientID) {
+		npcCtrl.setNearFlag(true);
+	}
+
+	public void sendCreateNPCmsg(UUID clientID, String[] position) {
+		try {
+			System.out.println("server telling clients about an NPC");
+			String message = new String("createNPC," + clientID.toString());
+			message += "," + position[0];
+			message += "," + position[1];
+			message += "," + position[2];
+			forwardPacketToAll(message, clientID);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	// Informs a client that the avatar with the identifier remoteId has left the server. 
 	// This message is meant to be sent to all client currently connected to the server 
@@ -119,9 +158,9 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 		{	e.printStackTrace();
 	}	}
 	
-	// Informs a client of the details for a remote client’s avatar. This message is in response 
-	// to the server receiving a DETAILS_FOR message from a remote client. That remote client’s 
-	// message’s localId becomes the remoteId for this message, and the remote client’s message’s 
+	// Informs a client of the details for a remote clientï¿½s avatar. This message is in response 
+	// to the server receiving a DETAILS_FOR message from a remote client. That remote clientï¿½s 
+	// messageï¿½s localId becomes the remoteId for this message, and the remote clientï¿½s messageï¿½s 
 	// remoteId is used to send this message to the proper client. 
 	// Message Format: (dsfr,remoteId,x,y,z) where x, y, and z represent the position.
 
@@ -137,7 +176,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 		{	e.printStackTrace();
 	}	}
 	
-	// Informs a local client that a remote client wants the local client’s avatar’s information. 
+	// Informs a local client that a remote client wants the local clientï¿½s avatarï¿½s information. 
 	// This message is meant to be sent to all clients connected to the server when a new client 
 	// joins the server. 
 	// Message Format: (wsds,remoteId)
@@ -151,7 +190,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 		{	e.printStackTrace();
 	}	}
 	
-	// Informs a client that a remote client’s avatar has changed position. x, y, and z represent 
+	// Informs a client that a remote clientï¿½s avatar has changed position. x, y, and z represent 
 	// the new position of the remote avatar. This message is meant to be forwarded to all clients
 	// connected to the server when it receives a MOVE message from the remote client.   
 	// Message Format: (move,remoteId,x,y,z) where x, y, and z represent the position.

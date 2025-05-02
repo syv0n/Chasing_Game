@@ -5,6 +5,7 @@ public class NetworkingServer
 {
 	private GameServerUDP thisUDPServer;
 	private GameServerTCP thisTCPServer;
+	private NPCcontroller npcCtrl;
 
 	public NetworkingServer(int serverPort, String protocol) 
 	{	try 
@@ -12,7 +13,14 @@ public class NetworkingServer
 			{	thisTCPServer = new GameServerTCP(serverPort);
 			}
 			else
-			{	thisUDPServer = new GameServerUDP(serverPort);
+			{	
+				try {
+					thisUDPServer = new GameServerUDP(serverPort, npcCtrl);
+				} catch (IOException e) {
+					System.out.println("server didn't start");
+					e.printStackTrace();
+				}
+				npcCtrl.start(thisUDPServer);
 			}
 		} 
 		catch (IOException e) 
