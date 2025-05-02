@@ -144,8 +144,8 @@ public class MyGame extends VariableFrameRateGame {
 		dragon.setLocalTranslation(initialTranslation);
 
 		person = new GameObject(GameObject.root(), personS, persontx);
-		initialScale = new Matrix4f().scaling(1f,1f,1f);
-		initialTranslation = new Matrix4f().translation(0f,0f,0f);
+		initialScale = new Matrix4f().scaling(0.5f,0.5f,0.5f);
+		initialTranslation = new Matrix4f().translation(0f,2.0f,0f);
 		person.setLocalScale(initialScale);
 		person.setLocalTranslation(initialTranslation);
 	}
@@ -280,11 +280,11 @@ public class MyGame extends VariableFrameRateGame {
 				dol.setLocalRotation(newRotation);
 				break;
 			}
-			case KeyEvent.VK_A: {
+			case KeyEvent.VK_Z: {
 				personS.playAnimation("WAVE", 0.5f, AnimatedShape.EndType.LOOP, 0);
 				break;
 			}
-			case KeyEvent.VK_Z: {
+			case KeyEvent.VK_X: {
 				personS.stopAnimation();
 				break;
 			}
