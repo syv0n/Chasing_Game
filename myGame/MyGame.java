@@ -122,6 +122,12 @@ public class MyGame extends VariableFrameRateGame {
 		sun.setLocalTranslation((initialTranslation));
 		sun.setLocalScale(initialScale);
 
+		person = new GameObject(GameObject.root(), personS, persontx);
+		initialTranslation = new Matrix4f().translation(0, 1, 0);
+		initialScale = new Matrix4f().scaling(0.2f);
+		person.setLocalTranslation(initialTranslation);
+		person.setLocalScale(initialScale);
+
 		//add X, Y, -Z axes
 		x = new GameObject(GameObject.root(), linxS);
 		y = new GameObject(GameObject.root(), linyS);
@@ -238,8 +244,10 @@ public class MyGame extends VariableFrameRateGame {
 		positionCameraBehind();
 
 		Vector3f loc = dol.getWorldLocation();
+		Vector3f personloc = person.getWorldLocation();
 		float height = lava.getHeight(loc.x(), loc.z());
 		dol.setLocalLocation(new Vector3f(loc.x(), height, loc.z()));
+		person.setLocalLocation(new Vector3f(personloc.x(), (height + 0.75f), personloc.z()));
 
 		processNetworking((float)elapsTime);
 	}
