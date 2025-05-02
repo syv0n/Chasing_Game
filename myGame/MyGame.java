@@ -26,6 +26,9 @@ public class MyGame extends VariableFrameRateGame {
 	private InputManager im;
 	private GhostManager gm;
 
+	private IAudioManager audioMgr;
+	private Sound sunSound;
+
 	private int counter = 0;
 	private Vector3f currentPosition;
 	private Matrix4f initialTranslation, initialRotation, initialScale;
@@ -136,18 +139,6 @@ public class MyGame extends VariableFrameRateGame {
 		
 		lava.getRenderStates().setTiling(1);
 		lava.getRenderStates().setTileFactor(10);
-
-		dragon = new GameObject(GameObject.root(), dragonS, dragontx);
-		initialScale = (new Matrix4f()).scaling(0.4f);
-		initialTranslation = new Matrix4f().translation(5f, 2f, 3f);
-		dragon.setLocalScale(initialScale);
-		dragon.setLocalTranslation(initialTranslation);
-
-		person = new GameObject(GameObject.root(), personS, persontx);
-		initialScale = new Matrix4f().scaling(0.5f,0.5f,0.5f);
-		initialTranslation = new Matrix4f().translation(0f,2.0f,0f);
-		person.setLocalScale(initialScale);
-		person.setLocalTranslation(initialTranslation);
 	}
 
 	@Override
@@ -159,11 +150,28 @@ public class MyGame extends VariableFrameRateGame {
 	}
 
 	@Override
+	public void loadSounds() {
+		AudioResource resource = null;
+		audioMgr = engine.getAudioManager();
+		resource = audioMgr.createAudioResource("lava.wav", AudioResourceType.AUDIO_SAMPLE);
+		sunSound = new Sound(resource, SoundType.SOUND_EFFECT, 100, true);
+		sunSound.initialize(audioMgr);
+		sunSound.setMaxDistance(10.0f);
+		sunSound.setMinDistance(0.5f);
+		sunSound.setRollOff(5.0f);
+	}
+
+	@Override
 	public void initializeGame() {
 		lastFrameTime = System.currentTimeMillis();
 		currFrameTime = System.currentTimeMillis();
 		elapsTime = 0.0;
 		(engine.getRenderSystem()).setWindowDimensions(1900, 1000);
+
+		// Initial sound settings
+		sunSound.setLocation(sun.getWorldLocation());
+		setEarPerimeters();
+		sunSound.play();
 
 		// ------------- positioning the camera -------------
 		//(engine.getRenderSystem().getViewport("MAIN").getCamera()).setLocation(new Vector3f(0, 0, 5));
@@ -199,8 +207,18 @@ public class MyGame extends VariableFrameRateGame {
 		setupNetworking();
 	}
 
+	public void setEarPerimeters() {
+		Camera camera = (engine.getRenderSystem()).getViewport("MAIN").getCamera();
+		audioMgr.getEar().setLocation(dol.getWorldLocation());
+		audioMgr.getEar().setOrientation(camera.getN(), new Vector3f(0.0f, 1.0f, 0.0f));
+	}
+
 	@Override
 	public void update() {    
+
+		sunSound.setLocation(sun.getWorldLocation());
+		setEarPerimeters();
+		
 		elapsTime = System.currentTimeMillis() - lastFrameTime;
 		lastFrameTime = System.currentTimeMillis();
 		personS.updateAnimation();
@@ -236,7 +254,7 @@ public class MyGame extends VariableFrameRateGame {
 		cam.setU(right);
 		cam.setV(up);
 		cam.setN(fwd);
-		cam.setLocation(loc.add(up.mul(1.3f)).add(fwd.mul(-2.5f)));
+		cam.setLocation(loc.add(up.mul(1.3f)).add(fwd.mul(-4.0f)));
 	}
 
 	// CAMERA POV of AVATAR/PLAYER
@@ -258,27 +276,42 @@ public class MyGame extends VariableFrameRateGame {
 		return dol;
 	}
 
+	private void switchAvatar(ObjShape shape, TextureImage texture) {
+		// Get location and rotation
+		Vector3f position = dol.getWorldLocation();
+		Matrix4f rotation = new Matrix4f(dol.getWorldRotation());
+		Matrix4f scale = new Matrix4f(dol.getLocalScale());
+
+		// Remove game object
+		engine.getSceneGraph().removeGameObject(dol);
+
+		// Create new game object
+		dol = new GameObject(GameObject.root(), shape, texture);
+		dol.setLocalLocation(position);
+		dol.setLocalRotation(rotation);
+		dol.setLocalScale(scale);
+
+		// notifying the networking system
+		if (protClient != null) {
+			protClient.sendMoveMessage(dol.getWorldLocation());
+		}
+
+		positionCameraBehind();
+	}
+
 	@Override
 	public void keyPressed(KeyEvent e) {
 		switch (e.getKeyCode()) {
-			case KeyEvent.VK_W: {
-				Vector3f oldPosition = dol.getWorldLocation();
-				Vector4f fwdDirection = new Vector4f(0f, 0f, 1f, 1f);
-				fwdDirection.mul(dol.getWorldRotation());
-				fwdDirection.mul(0.05f);
-				Vector3f newPosition = oldPosition.add(fwdDirection.x(), fwdDirection.y(), fwdDirection.z());
-				dol.setLocalLocation(newPosition);
-				protClient.sendMoveMessage(dol.getWorldLocation());
+			case KeyEvent.VK_1: {
+				switchAvatar(demonS, demontx);
 				break;
 			}
-			case KeyEvent.VK_D: {
-				Matrix4f oldRotation = new Matrix4f(dol.getWorldRotation());
-				Vector4f oldUp = new Vector4f(0f, 1f, 0f, 1f).mul(oldRotation);
-				Matrix4f rotAroundAvatarUp = new Matrix4f().rotation(-.01f, new Vector3f(oldUp.x(), oldUp.y(), oldUp.z()));
-				Matrix4f newRotation = oldRotation;
-				newRotation.mul(rotAroundAvatarUp);
-				dol.setLocalRotation(newRotation);
+			case KeyEvent.VK_2: {
+				switchAvatar(dragonS, dragontx);
 				break;
+			}
+			case KeyEvent.VK_3: {
+				switchAvatar(dolS, doltx);
 			}
 			case KeyEvent.VK_Z: {
 				personS.playAnimation("WAVE", 0.5f, AnimatedShape.EndType.LOOP, 0);
