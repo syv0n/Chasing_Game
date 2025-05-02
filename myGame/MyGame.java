@@ -4,6 +4,7 @@ import tage.*;
 import tage.shapes.*;
 import tage.input.*;
 import tage.input.action.*;
+import tage.audio.*;
 
 import net.java.games.input.*;
 import net.java.games.input.Component.Identifier.*;
@@ -303,7 +304,7 @@ public class MyGame extends VariableFrameRateGame {
 	public void keyPressed(KeyEvent e) {
 		switch (e.getKeyCode()) {
 			case KeyEvent.VK_1: {
-				switchAvatar(demonS, demontx);
+				switchAvatar(personS, persontx);
 				break;
 			}
 			case KeyEvent.VK_2: {
