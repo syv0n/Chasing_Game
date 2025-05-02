@@ -15,7 +15,6 @@ public class ProtocolClient extends GameConnectionClient
 {
     private MyGame game;
     private GhostManager ghostManager;
-    private GhostAvatar ghostAvatar;
     private UUID id;
 
     public ProtocolClient(InetAddress remoteAddr, int remotePort, ProtocolType protocolType, MyGame game) throws IOException
@@ -89,15 +88,6 @@ public class ProtocolClient extends GameConnectionClient
                 // Parse out the id into a UUID
                 UUID ghostID = UUID.fromString(messageTokens[1]);
                 sendDetailsForMessage(ghostID, game.getPlayerPosition());
-            }
-
-            if (messageTokens[0].compareTo("createNPC") == 0) {
-                Vector3f ghostPosition = new Vector3f(Float.parseFloat(messageTokens[1]), Float.parseFloat(messageTokens[2]), Float.parseFloat(messageTokens[3]));
-                try {
-                    createGhostNPC(ghostPosition);
-                } catch (IOException e) {
-                    System.out.println("error creating ghost npc")
-                }
             }
 
             // Handle MOVE message
@@ -188,28 +178,4 @@ public class ProtocolClient extends GameConnectionClient
     } catch (IOException e)
     {	e.printStackTrace();
     }	}
-
-    // Ghost NPC
-    private void createGhostNPC(Vector3f position) throws IOException {
-        if(ghostAvatar == null) {
-            ghostAvatar = new ghostAvatar(0, game.getGhostShape(), game.getGhostTexture(), position);
-        }
-    }
-    private void updateGhostAvatar(Vector3f position, double gsize) {
-        boolean gs;
-        if(ghostAvatar == null) {
-            try {
-                createGhostNPC(position);
-            } catch(IOException e) {
-                System.out.println("error creating npc");
-            }
-        }
-        ghostAvatar.setPosition(position);
-        if(gsize == 1.0) {
-            gs = false;
-        } else {
-            gs = true;
-        }
-        ghostAvatar.setSize(gs);
-    }
 }

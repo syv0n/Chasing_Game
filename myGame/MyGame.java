@@ -1,14 +1,22 @@
 package myGame;
 
 import tage.*;
+import tage.GameObject;
 import tage.shapes.*;
 import tage.input.*;
 import tage.input.action.*;
 import tage.audio.*;
 
+import tage.physics.PhysicsEngine;
+import tage.physics.PhysicsObject;
+import tage.physics.JBullet.*;
+import com.bulletphysics.dynamics.RigidBody;
+import com.bulletphysics.collision.dispatch.CollisionObject;
+
 import net.java.games.input.*;
 import net.java.games.input.Component.Identifier.*;
 import java.util.*;
+import java.util.List;
 import java.util.UUID;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -30,6 +38,11 @@ public class MyGame extends VariableFrameRateGame {
 	private IAudioManager audioMgr;
 	private Sound sunSound;
 
+	private PhysicsEngine physicsEngine;
+	private PhysicsObject caps, sphr, planeP;
+	private boolean running = false;
+	private float vals[] = new float[16];
+
 	private int counter = 0;
 	private Vector3f currentPosition;
 	private Matrix4f initialTranslation, initialRotation, initialScale;
@@ -37,7 +50,7 @@ public class MyGame extends VariableFrameRateGame {
 
 	private double lastFrameTime, currFrameTime, elapsTime;
 
-	private GameObject dol, sun, earth, moon, x, y, z, lava, dragon, person;
+	private GameObject dol, sun, earth, moon, x, y, z, lava, dragon, person, plane;
 	private ObjShape dolS, sphS, pyrS, torS, linxS, linyS, linzS, ghostS, lavaS, dragonS;
 	private TextureImage doltx, ghostT, lavatx, heightmap, dragontx, persontx;
 	private Light light1;
@@ -50,6 +63,8 @@ public class MyGame extends VariableFrameRateGame {
 	private boolean isClientConnected = false;
 	//skybox
 	private int hellscape;
+
+	List<GameObject> physicsObjects = new ArrayList<>();
 
 	private float amtt = 0.0f;
 
@@ -111,13 +126,13 @@ public class MyGame extends VariableFrameRateGame {
 
 		// build dolphin in the center of the window
 		dol = new GameObject(GameObject.root(), dolS, doltx);
-		initialTranslation = (new Matrix4f()).translation(0, 0, 0);
+		initialTranslation = (new Matrix4f()).translation(0, 5, 0);
 		initialScale = (new Matrix4f()).scaling(3.0f);
 		dol.setLocalTranslation(initialTranslation);
 		dol.setLocalScale(initialScale);
 
 		sun = new GameObject(GameObject.root(), sphS);
-		initialTranslation = (new Matrix4f()).translation(5, 1, 5);
+		initialTranslation = (new Matrix4f()).translation(5, 5, 5);
 		initialScale = (new Matrix4f()).scaling(0.5f);
 		sun.setLocalTranslation((initialTranslation));
 		sun.setLocalScale(initialScale);
@@ -146,6 +161,13 @@ public class MyGame extends VariableFrameRateGame {
 		
 		lava.getRenderStates().setTiling(1);
 		lava.getRenderStates().setTileFactor(10);
+
+		/*plane = new GameObject(GameObject.root(), new Plane());
+		initialTranslation = (new Matrix4f()).translation(10f, 0.1f, 10f);
+		initialScale = (new Matrix4f()).scaling(15.0f);
+		plane.setLocalTranslation(initialTranslation);
+		plane.setLocalScale(initialScale);
+		plane.getRenderStates().setColor(new Vector3f(1f, 0.5f, 0.5f));*/
 	}
 
 	@Override
@@ -179,6 +201,44 @@ public class MyGame extends VariableFrameRateGame {
 		sunSound.setLocation(sun.getWorldLocation());
 		setEarPerimeters();
 		sunSound.play();
+
+		// Initialize Physics :(
+		float[] gravity = {0f, -5f, 0f};
+		physicsEngine = (engine.getSceneGraph()).getPhysicsEngine();
+		physicsEngine.setGravity(gravity);
+
+		// Create Physics world
+		float mass = 1.0f;
+		float up[] = {0,1,0};
+		float radius = 0.75f;
+		float height = 2.0f;
+		double[] tempTransform;
+
+		Matrix4f translation = new Matrix4f(dol.getLocalTranslation());
+		tempTransform = toDoubleArray(translation.get(vals));
+		caps = (engine.getSceneGraph()).addPhysicsCapsuleZ(mass, tempTransform, radius, height);
+		//caps.setBounciness(0.8f);
+		dol.setPhysicsObject(caps);
+
+		translation = new Matrix4f(sun.getLocalTranslation());
+		tempTransform = toDoubleArray(translation.get(vals));
+		sphr = (engine.getSceneGraph()).addPhysicsSphere(mass, tempTransform, radius);
+		sphr.setBounciness(0.8f);
+		sun.setPhysicsObject(sphr);
+
+		translation = new Matrix4f(lava.getLocalTranslation());
+		tempTransform = toDoubleArray(translation.get(vals));
+		planeP = (engine.getSceneGraph()).addPhysicsStaticPlane(tempTransform, up, 0.0f);
+		planeP.setBounciness(1.0f);
+		lava.setPhysicsObject(planeP);
+
+		//engine.enableGraphicsWorldRender();
+		engine.enablePhysicsWorldRender();
+
+		// Add only the ones you care about
+		physicsObjects.add(dol);
+		physicsObjects.add(sun);
+		physicsObjects.add(lava);
 
 		// ------------- positioning the camera -------------
 		//(engine.getRenderSystem().getViewport("MAIN").getCamera()).setLocation(new Vector3f(0, 0, 5));
@@ -221,14 +281,40 @@ public class MyGame extends VariableFrameRateGame {
 	}
 
 	@Override
-	public void update() {    
+	public void update() {
+
+		elapsTime = System.currentTimeMillis() - lastFrameTime;
+		lastFrameTime = System.currentTimeMillis();
+		personS.updateAnimation();
+
+		if (running) {
+			AxisAngle4f aa = new AxisAngle4f();
+			Matrix4f mat = new Matrix4f();
+			Matrix4f mat2 = new Matrix4f().identity();
+			Matrix4f mat3 = new Matrix4f().identity();
+			checkForCollisions();
+			physicsEngine.update((float)elapsTime);
+			for (GameObject go : physicsObjects) {
+			System.out.println("Object: " + go.getPhysicsObject());
+			 if (go.getPhysicsObject() != null) {
+				 // set translation
+				mat.set(toFloatArray(go.getPhysicsObject().getTransform()));
+				mat2.set(3,0,mat.m30());
+				mat2.set(3,1,mat.m31());
+				mat2.set(3,2,mat.m32());
+				go.setLocalTranslation(mat2);
+// set rotation
+				mat.getRotation(aa);
+				mat3.rotation(aa);
+				go.setLocalRotation(mat3);
+				}
+			}
+		}
 
 		sunSound.setLocation(sun.getWorldLocation());
 		setEarPerimeters();
 		
-		elapsTime = System.currentTimeMillis() - lastFrameTime;
-		lastFrameTime = System.currentTimeMillis();
-		personS.updateAnimation();
+
 
 		// build and set HUD
 		int elapsTimeSec = Math.round((float) elapsTime);
@@ -243,11 +329,11 @@ public class MyGame extends VariableFrameRateGame {
 		im.update((float) elapsTime);
 		positionCameraBehind();
 
-		Vector3f loc = dol.getWorldLocation();
-		Vector3f personloc = person.getWorldLocation();
-		float height = lava.getHeight(loc.x(), loc.z());
-		dol.setLocalLocation(new Vector3f(loc.x(), height, loc.z()));
-		person.setLocalLocation(new Vector3f(personloc.x(), (height + 0.75f), personloc.z()));
+		//Vector3f loc = dol.getWorldLocation();
+		//Vector3f personloc = person.getWorldLocation();
+		//float height = lava.getHeight(loc.x(), loc.z());
+		//dol.setLocalLocation(new Vector3f(loc.x(), height, loc.z()));
+		//person.setLocalLocation(new Vector3f(personloc.x(), (height + 0.75f), personloc.z()));
 
 		processNetworking((float)elapsTime);
 	}
@@ -308,6 +394,51 @@ public class MyGame extends VariableFrameRateGame {
 		positionCameraBehind();
 	}
 
+	private float[] toFloatArray(double[] arr)
+	{ if (arr == null) return null;
+		int n = arr.length;
+		float[] ret = new float[n];
+		for (int i = 0; i < n; i++)
+		{ ret[i] = (float)arr[i];
+		}
+		return ret;
+	}
+	private double[] toDoubleArray(float[] arr)
+	{ if (arr == null) return null;
+		int n = arr.length;
+		double[] ret = new double[n];
+		for (int i = 0; i < n; i++)
+		{ ret[i] = (double)arr[i];
+		}
+		return ret;
+	}
+
+	private void checkForCollisions()
+	{	com.bulletphysics.dynamics.DynamicsWorld dynamicsWorld;
+		com.bulletphysics.collision.broadphase.Dispatcher dispatcher;
+		com.bulletphysics.collision.narrowphase.PersistentManifold manifold;
+		com.bulletphysics.dynamics.RigidBody object1, object2;
+		com.bulletphysics.collision.narrowphase.ManifoldPoint contactPoint;
+
+		dynamicsWorld = ((JBulletPhysicsEngine)physicsEngine).getDynamicsWorld();
+		dispatcher = dynamicsWorld.getDispatcher();
+		int manifoldCount = dispatcher.getNumManifolds();
+		for (int i=0; i < manifoldCount; i++)
+		{	manifold = dispatcher.getManifoldByIndexInternal(i);
+			object1 = (com.bulletphysics.dynamics.RigidBody)manifold.getBody0();
+			object2 = (com.bulletphysics.dynamics.RigidBody)manifold.getBody1();
+			JBulletPhysicsObject obj1 = JBulletPhysicsObject.getJBulletPhysicsObject(object1);
+			JBulletPhysicsObject obj2 = JBulletPhysicsObject.getJBulletPhysicsObject(object2);
+			for (int j = 0; j < manifold.getNumContacts(); j++)
+			{	contactPoint = manifold.getContactPoint(j);
+				if (contactPoint.getDistance() < 0.0f)
+				{	System.out.println("---- hit between " + obj1 + " and " + obj2);
+					break;
+				}
+			}
+		}
+	}
+
 	@Override
 	public void keyPressed(KeyEvent e) {
 		switch (e.getKeyCode()) {
@@ -321,6 +452,7 @@ public class MyGame extends VariableFrameRateGame {
 			}
 			case KeyEvent.VK_3: {
 				switchAvatar(dolS, doltx);
+				break;
 			}
 			case KeyEvent.VK_Z: {
 				personS.playAnimation("WAVE", 0.5f, AnimatedShape.EndType.LOOP, 0);
@@ -328,6 +460,11 @@ public class MyGame extends VariableFrameRateGame {
 			}
 			case KeyEvent.VK_X: {
 				personS.stopAnimation();
+				break;
+			}
+			case KeyEvent.VK_SPACE:
+			{ System.out.println("starting physics");
+				running = true;
 				break;
 			}
 		}
