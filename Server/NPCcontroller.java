@@ -19,6 +19,10 @@ public class NPCcontroller {
         nearFlag = flag;
     }
 
+    public NPC getNPC() {
+        return npc;
+    }
+
     public boolean getNearFlag() {
         return nearFlag;
     }

@@ -90,6 +90,19 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 
 	}
 
+	public void sendCheckForAvatarNear() {
+		try {
+			String message = new String("isnr");
+			message += "," + npcCtrl.getNPC().getX();
+			message += "," + npcCtrl.getNPC().getY();
+			message += "," + npcCtrl.getNPC().getZ();
+			sendPacketToAll(message);
+
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	// Informs the client who just requested to join the server if their if their 
 	// request was able to be granted. 
 	// Message Format: (join,success) or (join,failure)
