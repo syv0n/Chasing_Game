@@ -109,9 +109,9 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 	public void sendCheckForAvatarNear() {
 		try {
 			String message = new String("isnr");
-			message += "," + npcCtrl.getNPC().getX();
-			message += "," + npcCtrl.getNPC().getY();
-			message += "," + npcCtrl.getNPC().getZ();
+			message += ", " + npcCtrl.getNPC().getX();
+			message += ", " + npcCtrl.getNPC().getY();
+			message += ", " + npcCtrl.getNPC().getZ();
 			sendPacketToAll(message);
 
 		} catch(IOException e) {

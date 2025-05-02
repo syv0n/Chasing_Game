@@ -74,6 +74,7 @@ public class MyGame extends VariableFrameRateGame {
 	@Override
 	public void loadShapes() {
 		dolS = new ImportedModel("dolphinHighPoly.obj");
+		npcS = new ImportedModel("dolphinHighPoly.obj");
 		ghostS = new ImportedModel("dolphinHighPoly.obj");
 		dragonS = new ImportedModel("DragonFolk.obj");
 		personS = new AnimatedShape("person.rkm", "person.rks");

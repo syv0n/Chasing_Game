@@ -96,12 +96,13 @@ public class ProtocolClient extends GameConnectionClient
                 try {
                     createGhostNPC(ghostPosition);
                 } catch (IOException e) {
-                    System.out.println("error creating ghost npc")
+                    System.out.println("error creating ghost npc");
                 }
             }
 
             if (messageTokens[0].compareTo("isnr") == 0) {
-                
+                Vector3f NPCposition = new Vector3f(Float.parseFloat(messageTokens[1]), Float.parseFloat(messageTokens[2]), Float.parseFloat(messageTokens[3]));
+    
             }
 
             if (messageTokens[0].compareTo("mnpc") == 0) {

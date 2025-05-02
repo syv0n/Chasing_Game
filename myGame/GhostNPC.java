@@ -11,15 +11,20 @@ public class GhostNPC extends GameObject {
     {
         super(GameObject.root(), s, t);
         this.id = id;
-        setPosition(p);
+        this.setLocalLocation(p);
+    }
+
+    public void setPosition(Vector3f position) {
+        Vector3f newPosition = position.add(0, 0.5f, 0);
+        this.setLocalLocation(newPosition);
     }
 
     public void setSize(boolean big)
     {
         if (!big) {
-            this.setLocalScale(new Matrix4f().scaling(0.5f));
+            this.setLocalScale(new Matrix4f().scaling(2.0f));
         } else {
-            this.setLocalScale(new Matrix4f().scaling(1.0f));
+            this.setLocalScale(new Matrix4f().scaling(3.0f));
         }
     }
 }
