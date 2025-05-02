@@ -15,7 +15,7 @@ public class ProtocolClient extends GameConnectionClient
 {
     private MyGame game;
     private GhostManager ghostManager;
-    private GhostAvatar ghostAvatar;
+    private GhostNPC ghostNPC;
     private UUID id;
 
     public ProtocolClient(InetAddress remoteAddr, int remotePort, ProtocolType protocolType, MyGame game) throws IOException
@@ -98,6 +98,16 @@ public class ProtocolClient extends GameConnectionClient
                 } catch (IOException e) {
                     System.out.println("error creating ghost npc")
                 }
+            }
+
+            if (messageTokens[0].compareTo("isnr") == 0) {
+                
+            }
+
+            if (messageTokens[0].compareTo("mnpc") == 0) {
+                Vector3f newPosition = new Vector3f(Float.parseFloat(messageTokens[1], Float.parseFloat(messageTokens[2]), Float.parseFloat(messageTokens[3])));
+                double size = Double.parseDouble(messageTokens[4]);
+                updateGhostNPC(newPosition, size);
             }
 
             // Handle MOVE message
@@ -191,25 +201,25 @@ public class ProtocolClient extends GameConnectionClient
 
     // Ghost NPC
     private void createGhostNPC(Vector3f position) throws IOException {
-        if(ghostAvatar == null) {
-            ghostAvatar = new ghostAvatar(0, game.getGhostShape(), game.getGhostTexture(), position);
+        if(ghostNPC == null) {
+            ghostNPC = new GhostNPC(0, game.getGhostShape(), game.getGhostTexture(), position);
         }
     }
-    private void updateGhostAvatar(Vector3f position, double gsize) {
+    private void updateGhostNPC(Vector3f position, double gsize) {
         boolean gs;
-        if(ghostAvatar == null) {
+        if(ghostNPC == null) {
             try {
                 createGhostNPC(position);
             } catch(IOException e) {
                 System.out.println("error creating npc");
             }
         }
-        ghostAvatar.setPosition(position);
+        ghostNPC.setPosition(position);
         if(gsize == 1.0) {
             gs = false;
         } else {
             gs = true;
         }
-        ghostAvatar.setSize(gs);
+        ghostNPC.setSize(gs);
     }
 }

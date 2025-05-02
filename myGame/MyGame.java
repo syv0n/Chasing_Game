@@ -38,8 +38,8 @@ public class MyGame extends VariableFrameRateGame {
 	private double lastFrameTime, currFrameTime, elapsTime;
 
 	private GameObject dol, sun, earth, moon, x, y, z, lava, dragon, person;
-	private ObjShape dolS, sphS, pyrS, torS, linxS, linyS, linzS, ghostS, lavaS, dragonS;
-	private TextureImage doltx, ghostT, lavatx, heightmap, dragontx, persontx;
+	private ObjShape dolS, sphS, pyrS, torS, linxS, linyS, linzS, ghostS, lavaS, dragonS, npcS;
+	private TextureImage doltx, ghostT, lavatx, heightmap, dragontx, persontx, npctx;
 	private Light light1;
 	private AnimatedShape personS;
 
@@ -342,6 +342,14 @@ public class MyGame extends VariableFrameRateGame {
 
 	public TextureImage getGhostTexture() {
 		return ghostT;
+	}
+
+	public ObjShape getNPCshape() {
+		return npcS;
+	}
+
+	public TextureImage getNPCtexture() {
+		return npctx;
 	}
 
 	public GhostManager getGhostManager() {
