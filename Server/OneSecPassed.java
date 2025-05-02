@@ -3,17 +3,21 @@ import tage.ai.behaviortrees.BTCondition;
 public class OneSecPassed extends BTCondition {
     NPC npc; 
     NPCcontroller npcc;
-    GameServerUDP server;
+    private long lastTime;
 
-    public OneSecPassed(GameServerUDP s, NPCcontroller c, NPC n, boolean toNegate) {
+    public OneSecPassed(NPCcontroller c, NPC n, boolean toNegate) {
         super(toNegate);
-        server = s;
         npcc = c;
         npc = n;
     }
 
+    // checks to see if one sec has passed
     protected boolean check() {
-        server.sendOneSecPassed();
-        return true;
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastTime >= 1000) {
+            lastTime = currentTime;
+            return true;
+        }
+        return false;
     }
 }

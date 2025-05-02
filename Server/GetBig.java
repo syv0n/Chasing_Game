@@ -2,18 +2,14 @@ import tage.ai.behaviortrees.BTCondition;
 
 public class GetBig extends BTCondition {
     NPC npc;
-    NPCcontroller npcc;
-    GameServerUDP server;
 
-    public GetBig(GameServerUDP s, NPCcontroller c, NPC n, boolean toNegate) {
-        super(toNegate);
-        server = s;
-        npcc = c;
+    public GetBig(NPC n) {
+        super(false);
         npc = n;
     }
 
     protected boolean check() {
-        server.sendGetBig();
+        npc.getBig();
         return true;
     }
 }

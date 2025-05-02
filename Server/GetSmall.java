@@ -2,18 +2,14 @@ import tage.ai.behaviortrees.BTCondition;
 
 public class GetSmall extends BTCondition {
     NPC npc;
-    NPCcontroller npcc;
-    GameServerUDP server;
 
-    public GetSmall(GameServerUDP s, NPCcontroller c, NPC n, boolean toNegate) {
-        super(toNegate);
-        server = s;
-        npcc = c;
+    public GetSmall(NPC n) {
+        super(false);
         npc = n;
     }
 
     protected boolean check() {
-        server.sendGetSmall();
+        npc.getSmall();
         return true;
     }
 }
