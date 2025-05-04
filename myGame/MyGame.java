@@ -126,7 +126,7 @@ public class MyGame extends VariableFrameRateGame {
 
 		// build dolphin in the center of the window
 		dol = new GameObject(GameObject.root(), dolS, doltx);
-		initialTranslation = (new Matrix4f()).translation(0, 5, 0);
+		initialTranslation = (new Matrix4f()).translation(0, 1, 0);
 		initialScale = (new Matrix4f()).scaling(3.0f);
 		dol.setLocalTranslation(initialTranslation);
 		dol.setLocalScale(initialScale);
@@ -274,6 +274,29 @@ public class MyGame extends VariableFrameRateGame {
 		setupNetworking();
 	}
 
+	private void syncPhysicsToGraphics() {
+		AxisAngle4f aa = new AxisAngle4f();
+		Matrix4f physMat = new Matrix4f();
+		Matrix4f trans = new Matrix4f().identity();
+		Matrix4f rot   = new Matrix4f().identity();
+
+		for (GameObject go : physicsObjects) {
+			PhysicsObject po = go.getPhysicsObject();
+			if (po == null) continue;
+			// read Bullet’s transform
+			physMat.set(toFloatArray(po.getTransform()));
+			// translation
+			trans.set(3,0, physMat.m30());
+			trans.set(3,1, physMat.m31());
+			trans.set(3,2, physMat.m32());
+			go.setLocalTranslation(trans);
+			// rotation
+			physMat.getRotation(aa);
+			rot.rotation(aa);
+			go.setLocalRotation(rot);
+		}
+	}
+
 	public void setEarPerimeters() {
 		Camera camera = (engine.getRenderSystem()).getViewport("MAIN").getCamera();
 		audioMgr.getEar().setLocation(dol.getWorldLocation());
@@ -293,24 +316,22 @@ public class MyGame extends VariableFrameRateGame {
 			Matrix4f mat2 = new Matrix4f().identity();
 			Matrix4f mat3 = new Matrix4f().identity();
 			checkForCollisions();
-			physicsEngine.update((float)elapsTime);
+			physicsEngine.update((float) elapsTime);
 			for (GameObject go : physicsObjects) {
-			System.out.println("Object: " + go.getPhysicsObject());
-			 if (go.getPhysicsObject() != null) {
-				 // set translation
-				mat.set(toFloatArray(go.getPhysicsObject().getTransform()));
-				mat2.set(3,0,mat.m30());
-				mat2.set(3,1,mat.m31());
-				mat2.set(3,2,mat.m32());
-				go.setLocalTranslation(mat2);
+				if (go.getPhysicsObject() != null) {
+					// set translation
+					mat.set(toFloatArray(go.getPhysicsObject().getTransform()));
+					mat2.set(3, 0, mat.m30());
+					mat2.set(3, 1, mat.m31());
+					mat2.set(3, 2, mat.m32());
+					go.setLocalTranslation(mat2);
 // set rotation
-				mat.getRotation(aa);
-				mat3.rotation(aa);
-				go.setLocalRotation(mat3);
+					mat.getRotation(aa);
+					mat3.rotation(aa);
+					go.setLocalRotation(mat3);
 				}
 			}
 		}
-
 		sunSound.setLocation(sun.getWorldLocation());
 		setEarPerimeters();
 		
@@ -332,7 +353,7 @@ public class MyGame extends VariableFrameRateGame {
 		//Vector3f loc = dol.getWorldLocation();
 		//Vector3f personloc = person.getWorldLocation();
 		//float height = lava.getHeight(loc.x(), loc.z());
-		//dol.setLocalLocation(new Vector3f(loc.x(), height, loc.z()));
+		//dol.setLocalLocation(new Vector3f(loc.x(), height + 1, loc.z()));
 		//person.setLocalLocation(new Vector3f(personloc.x(), (height + 0.75f), personloc.z()));
 
 		processNetworking((float)elapsTime);
@@ -432,7 +453,7 @@ public class MyGame extends VariableFrameRateGame {
 			for (int j = 0; j < manifold.getNumContacts(); j++)
 			{	contactPoint = manifold.getContactPoint(j);
 				if (contactPoint.getDistance() < 0.0f)
-				{	System.out.println("---- hit between " + obj1 + " and " + obj2);
+				{	//System.out.println("---- hit between " + obj1 + " and " + obj2);
 					break;
 				}
 			}

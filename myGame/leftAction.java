@@ -21,6 +21,15 @@ public class leftAction extends AbstractInputAction{
         float keyValue = e.getValue();
         if (keyValue > -.2 && keyValue < .2) return;
         av = game.getDol();
-        av.yaw(-1f);
+
+        Vector3f locTor = new Vector3f(0f, 5f, 0f);
+
+        Matrix4f rotMatrix = av.getWorldRotation();
+
+        Quaternionf orientation = new Quaternionf().setFromNormalized(rotMatrix);
+
+        Vector3f worldTorque = orientation.transform(locTor);
+
+        av.getPhysicsObject().applyTorque(worldTorque.x(), worldTorque.y(), worldTorque.z());
     }
 }

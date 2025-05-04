@@ -10,7 +10,7 @@ import org.joml.*;
 public class backAction extends AbstractInputAction {
     private MyGame game;
     private GameObject av;
-    private Vector3f oldPosition, newPosition, camDirection;
+    private Vector3f oldPosition, newPosition, camDirection, fwd;
     private Vector4f fwdDirection;
     private Camera cam;
     private float maxDist = 7f;
@@ -21,13 +21,20 @@ public class backAction extends AbstractInputAction {
 
     @Override
     public void performAction(float time, Event e) {
+        float keyValue = e.getValue();
+        if (keyValue > -.2 && keyValue < .2) return; // deadzone
         av = game.getDol();
-        oldPosition = av.getWorldLocation();
-        fwdDirection = new Vector4f(0f, 0f, -1f, 1f);
-        fwdDirection.mul(av.getWorldRotation());
-        fwdDirection.mul(0.1f);
-        newPosition = oldPosition.add(fwdDirection.x(),
-                fwdDirection.y(), fwdDirection.z());
-        av.setLocalLocation(newPosition);
+
+        fwd = new Vector3f(0, 0, -1);
+
+        Matrix4f worldTransform = av.getWorldRotation();
+        Quaternionf rot = new Quaternionf();
+        worldTransform.getUnnormalizedRotation(rot);
+        rot.transform(fwd);
+        fwd.normalize();
+        fwd.mul(3f);
+
+        av.getPhysicsObject().applyForce(fwd.x(), fwd.y(), fwd.z(), 0f, 0f, 0f);
+
     }
 }
