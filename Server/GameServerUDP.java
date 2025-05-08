@@ -86,10 +86,10 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 		try {
 			NPC npc = npcCtrl.getNPC();
 			String message = new String("mnpc");
-			message += "," + npc.getX();
-			message += "," + npc.getY();
-			message += "," + npc.getZ();
-			message += "," + npc.getSize();
+			message += ", " + npc.getX();
+			message += ", " + npc.getY();
+			message += ", " + npc.getZ();
+			message += ", " + npc.getSize();
 			sendPacketToAll(message);
 		} catch(IOException e) {
 			e.printStackTrace();

@@ -102,7 +102,14 @@ public class ProtocolClient extends GameConnectionClient
 
             if (messageTokens[0].compareTo("isnr") == 0) {
                 Vector3f NPCposition = new Vector3f(Float.parseFloat(messageTokens[1]), Float.parseFloat(messageTokens[2]), Float.parseFloat(messageTokens[3]));
-    
+                float distance = NPCposition.distance(game.getDol().getWorldLocation());
+                boolean isNear = distance < 1.0f;
+                String response = "isNear, " + isNear;
+                try {
+                    sendPacket(response);
+                } catch (IOException e) {
+                    System.err.println("Error sending proximity packet: " + e.getMessage());
+                }
             }
 
             if (messageTokens[0].compareTo("mnpc") == 0) {
