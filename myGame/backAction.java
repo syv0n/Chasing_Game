@@ -21,7 +21,7 @@ public class backAction extends AbstractInputAction {
 
     @Override
     public void performAction(float time, Event e) {
-        av = game.getDol();
+        av = game.getPerson();
         oldPosition = av.getWorldLocation();
         fwdDirection = new Vector4f(0f, 0f, -1f, 1f);
         fwdDirection.mul(av.getWorldRotation());

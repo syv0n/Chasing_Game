@@ -37,9 +37,9 @@ public class MyGame extends VariableFrameRateGame {
 
 	private double lastFrameTime, currFrameTime, elapsTime;
 
-	private GameObject dol, sun, earth, moon, x, y, z, lava, dragon, person;
-	private ObjShape dolS, sphS, pyrS, torS, linxS, linyS, linzS, ghostS, lavaS, dragonS, npcS;
-	private TextureImage doltx, ghostT, lavatx, heightmap, dragontx, persontx, npctx;
+	private GameObject lava, dragon, person;
+	private ObjShape ghostS, lavaS, dragonS, npcS;
+	private TextureImage ghostT, lavatx, heightmap, dragontx, persontx, npctx;
 	private Light light1;
 	private AnimatedShape personS;
 
@@ -73,32 +73,25 @@ public class MyGame extends VariableFrameRateGame {
 
 	@Override
 	public void loadShapes() {
-		dolS = new ImportedModel("dolphinHighPoly.obj");
-		npcS = new ImportedModel("dolphinHighPoly.obj");
-		ghostS = new ImportedModel("dolphinHighPoly.obj");
+
+		//player characters
 		dragonS = new ImportedModel("DragonFolk.obj");
 		personS = new AnimatedShape("person.rkm", "person.rks");
 		personS.loadAnimation("WAVE", "wave.rka");
-
-
-		ghostS = new Sphere();
-		sphS = new Sphere();
-		linxS = new Line(new Vector3f(0f, 0f, 0f), new Vector3f(3f, 0f, 0f));
-		linyS = new Line(new Vector3f(0f, 0f, 0f), new Vector3f(0f, 3f, 0f));
-		linzS = new Line(new Vector3f(0f, 0f, 0f), new Vector3f(0f, 0f, 3f));
 
 		lavaS = new TerrainPlane(1000);
 	}
 
 	@Override
 	public void loadTextures() {
-		doltx = new TextureImage("Dolphin_HighPolyUV.png");
-		ghostT = new TextureImage("redDolphin.jpg");
+
+		// terrain
 		lavatx = new TextureImage("10001.png");
 		heightmap = new TextureImage("testheightmap.png");
+
+		// player characters
 		dragontx = new TextureImage("DragonFolk.png");
 		persontx = new TextureImage("person.png");
-		npctx = new TextureImage("redDolphin.jpg");
 	}
 
 	@Override
@@ -112,32 +105,11 @@ public class MyGame extends VariableFrameRateGame {
 	public void buildObjects() {
 		Matrix4f initialTranslation, initialScale, initialRotation;
 
-		// build dolphin in the center of the window
-		dol = new GameObject(GameObject.root(), dolS, doltx);
-		initialTranslation = (new Matrix4f()).translation(0, 0, 0);
-		initialScale = (new Matrix4f()).scaling(3.0f);
-		dol.setLocalTranslation(initialTranslation);
-		dol.setLocalScale(initialScale);
-
-		sun = new GameObject(GameObject.root(), sphS);
-		initialTranslation = (new Matrix4f()).translation(5, 1, 5);
-		initialScale = (new Matrix4f()).scaling(0.5f);
-		sun.setLocalTranslation((initialTranslation));
-		sun.setLocalScale(initialScale);
-
 		person = new GameObject(GameObject.root(), personS, persontx);
 		initialTranslation = new Matrix4f().translation(0, 1, 0);
 		initialScale = new Matrix4f().scaling(0.2f);
 		person.setLocalTranslation(initialTranslation);
 		person.setLocalScale(initialScale);
-
-		//add X, Y, -Z axes
-		x = new GameObject(GameObject.root(), linxS);
-		y = new GameObject(GameObject.root(), linyS);
-		z = new GameObject(GameObject.root(), linzS);
-		(x.getRenderStates()).setColor(new Vector3f(1f, 0f, 0f));
-		(y.getRenderStates()).setColor(new Vector3f(0f, 1f, 0f));
-		(z.getRenderStates()).setColor(new Vector3f(0f, 0f, 1f));
 
 		//build terrain
 		lava = new GameObject(GameObject.root(), lavaS, lavatx);
@@ -164,11 +136,14 @@ public class MyGame extends VariableFrameRateGame {
 		AudioResource resource = null;
 		audioMgr = engine.getAudioManager();
 		resource = audioMgr.createAudioResource("lava.wav", AudioResourceType.AUDIO_SAMPLE);
+
+		/*
 		sunSound = new Sound(resource, SoundType.SOUND_EFFECT, 100, true);
 		sunSound.initialize(audioMgr);
 		sunSound.setMaxDistance(10.0f);
 		sunSound.setMinDistance(0.5f);
 		sunSound.setRollOff(5.0f);
+		*/
 	}
 
 	@Override
@@ -179,9 +154,9 @@ public class MyGame extends VariableFrameRateGame {
 		(engine.getRenderSystem()).setWindowDimensions(1900, 1000);
 
 		// Initial sound settings
-		sunSound.setLocation(sun.getWorldLocation());
-		setEarPerimeters();
-		sunSound.play();
+		//sunSound.setLocation(sun.getWorldLocation());
+		//setEarPerimeters();
+		//sunSound.play();
 
 		// ------------- positioning the camera -------------
 		//(engine.getRenderSystem().getViewport("MAIN").getCamera()).setLocation(new Vector3f(0, 0, 5));
@@ -219,15 +194,15 @@ public class MyGame extends VariableFrameRateGame {
 
 	public void setEarPerimeters() {
 		Camera camera = (engine.getRenderSystem()).getViewport("MAIN").getCamera();
-		audioMgr.getEar().setLocation(dol.getWorldLocation());
+		audioMgr.getEar().setLocation(person.getWorldLocation());
 		audioMgr.getEar().setOrientation(camera.getN(), new Vector3f(0.0f, 1.0f, 0.0f));
 	}
 
 	@Override
 	public void update() {    
 
-		sunSound.setLocation(sun.getWorldLocation());
-		setEarPerimeters();
+		//sunSound.setLocation(sun.getWorldLocation());
+		//setEarPerimeters();
 		
 		elapsTime = System.currentTimeMillis() - lastFrameTime;
 		lastFrameTime = System.currentTimeMillis();
@@ -246,10 +221,8 @@ public class MyGame extends VariableFrameRateGame {
 		im.update((float) elapsTime);
 		positionCameraBehind();
 
-		Vector3f loc = dol.getWorldLocation();
 		Vector3f personloc = person.getWorldLocation();
-		float height = lava.getHeight(loc.x(), loc.z());
-		dol.setLocalLocation(new Vector3f(loc.x(), height, loc.z()));
+		float height = lava.getHeight(personloc.x(), personloc.z());
 		person.setLocalLocation(new Vector3f(personloc.x(), (height + 0.75f), personloc.z()));
 
 		processNetworking((float)elapsTime);
@@ -259,10 +232,10 @@ public class MyGame extends VariableFrameRateGame {
 		Vector3f loc, fwd, up, right;
 		Camera cam;
 		cam = (engine.getRenderSystem().getViewport("MAIN").getCamera());
-		loc = dol.getWorldLocation();
-		fwd = dol.getWorldForwardVector();
-		up = dol.getWorldUpVector();
-		right = dol.getWorldRightVector();
+		loc = person.getWorldLocation();
+		fwd = person.getWorldForwardVector();
+		up = person.getWorldUpVector();
+		right = person.getWorldRightVector();
 		cam.setU(right);
 		cam.setV(up);
 		cam.setN(fwd);
@@ -284,28 +257,28 @@ public class MyGame extends VariableFrameRateGame {
 
 	}
 
-	public GameObject getDol() {
-		return dol;
+	public GameObject getPerson() {
+		return person;
 	}
 
 	private void switchAvatar(ObjShape shape, TextureImage texture) {
 		// Get location and rotation
-		Vector3f position = dol.getWorldLocation();
-		Matrix4f rotation = new Matrix4f(dol.getWorldRotation());
-		Matrix4f scale = new Matrix4f(dol.getLocalScale());
+		Vector3f position = person.getWorldLocation();
+		Matrix4f rotation = new Matrix4f(person.getWorldRotation());
+		Matrix4f scale = new Matrix4f(person.getLocalScale());
 
 		// Remove game object
-		engine.getSceneGraph().removeGameObject(dol);
+		engine.getSceneGraph().removeGameObject(person);
 
 		// Create new game object
-		dol = new GameObject(GameObject.root(), shape, texture);
-		dol.setLocalLocation(position);
-		dol.setLocalRotation(rotation);
-		dol.setLocalScale(scale);
+		person = new GameObject(GameObject.root(), shape, texture);
+		person.setLocalLocation(position);
+		person.setLocalRotation(rotation);
+		person.setLocalScale(scale);
 
 		// notifying the networking system
 		if (protClient != null) {
-			protClient.sendMoveMessage(dol.getWorldLocation());
+			protClient.sendMoveMessage(person.getWorldLocation());
 		}
 
 		positionCameraBehind();
@@ -321,9 +294,6 @@ public class MyGame extends VariableFrameRateGame {
 			case KeyEvent.VK_2: {
 				switchAvatar(dragonS, dragontx);
 				break;
-			}
-			case KeyEvent.VK_3: {
-				switchAvatar(dolS, doltx);
 			}
 			case KeyEvent.VK_Z: {
 				personS.playAnimation("WAVE", 0.5f, AnimatedShape.EndType.LOOP, 0);
@@ -386,7 +356,7 @@ public class MyGame extends VariableFrameRateGame {
 	}
 
 	public Vector3f getPlayerPosition() {
-		return dol.getWorldLocation();
+		return person.getWorldLocation();
 	}
 
 	public void setIsConnected(boolean value) {

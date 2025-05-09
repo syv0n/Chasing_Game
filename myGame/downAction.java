@@ -19,7 +19,7 @@ public class downAction extends AbstractInputAction{
     public void performAction(float time, Event e)
     { float keyValue = e.getValue();
         if (keyValue > -.2 && keyValue < .2) return; // deadzone
-        av = game.getDol();
+        av = game.getPerson();
         av.pitch(-1f);
     }
 }
