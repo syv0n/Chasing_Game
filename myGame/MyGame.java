@@ -22,6 +22,14 @@ import java.io.*;
 import javax.swing.*;
 import org.joml.*;
 
+// physics
+import tage.physics.PhysicsEngine;
+import tage.physics.PhysicsObject;
+import tage.physics.JBullet.*;
+import com.bulletphysics.dynamics.RigidBody;
+import com.bulletphysics.collision.dispatch.CollisionObject;
+
+
 public class MyGame extends VariableFrameRateGame {
 	private static Engine engine;
 	private InputManager im;
@@ -37,9 +45,9 @@ public class MyGame extends VariableFrameRateGame {
 
 	private double lastFrameTime, currFrameTime, elapsTime;
 
-	private GameObject lava, dragon, person;
-	private ObjShape ghostS, lavaS, dragonS, npcS;
-	private TextureImage ghostT, lavatx, heightmap, dragontx, persontx, npctx;
+	private GameObject lava, dragon, person, plane;
+	private ObjShape ghostS, lavaS, dragonS, npcS, planeS;
+	private TextureImage ghostT, lavatx, heightmap, dragontx, persontx, npctx, groundtx;
 	private Light light1;
 	private AnimatedShape personS;
 
@@ -48,6 +56,13 @@ public class MyGame extends VariableFrameRateGame {
 	private ProtocolType serverProtocol;
 	private ProtocolClient protClient;
 	private boolean isClientConnected = false;
+
+	// physics engine
+	private PhysicsEngine physicsEngine;
+	private PhysicsObject caps1P, caps2P, planeP;
+	private boolean running = false;
+	private float vals[] = new float[16];
+
 	//skybox
 	private int hellscape;
 
@@ -79,7 +94,9 @@ public class MyGame extends VariableFrameRateGame {
 		personS = new AnimatedShape("person.rkm", "person.rks");
 		personS.loadAnimation("WAVE", "wave.rka");
 
+		// terrain + plane
 		lavaS = new TerrainPlane(1000);
+		planeS = new Plane();
 	}
 
 	@Override
@@ -88,6 +105,9 @@ public class MyGame extends VariableFrameRateGame {
 		// terrain
 		lavatx = new TextureImage("10001.png");
 		heightmap = new TextureImage("testheightmap.png");
+
+		// plane 
+		groundtx = new TextureImage("ground.jpg");
 
 		// player characters
 		dragontx = new TextureImage("DragonFolk.png");
@@ -121,6 +141,13 @@ public class MyGame extends VariableFrameRateGame {
 		
 		lava.getRenderStates().setTiling(1);
 		lava.getRenderStates().setTileFactor(10);
+
+		// build plane
+		plane = new GameObject(GameObject.root(), planeS, groundtx);
+		initialTranslation = new Matrix4f().translation(0,0.3f,0);
+		initialScale = new Matrix4f().scaling(10f);
+		plane.setLocalTranslation(initialTranslation);
+		plane.setLocalScale(initialScale);
 	}
 
 	@Override
@@ -190,6 +217,30 @@ public class MyGame extends VariableFrameRateGame {
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 
 		setupNetworking();
+
+		// initialize physics system
+		float[] gravity = {0f, -5f, 0f};
+		physicsEngine = engine.getSceneGraph().getPhysicsEngine();
+		physicsEngine.setGravity(gravity);
+
+		float up[] = {0, 1, 0};
+		float radius = 0.6f;
+		float height = 0.35f;
+		double[] tempTransform;
+
+		Matrix4f translation = new Matrix4f(person.getLocalTranslation());
+		tempTransform = toDoubleArray(translation.get(vals));
+		caps1P = (engine.getSceneGraph()).addPhysicsCapsule(0.0f, tempTransform, radius, height);
+		caps1P.setBounciness(0.8f);
+		person.setPhysicsObject(caps1P);
+
+		planeP = (engine.getSceneGraph()).addPhysicsStaticPlane(tempTransform, up, 0.0f);
+		planeP.setBounciness(1.0f);
+		plane.setPhysicsObject(planeP);
+
+		engine.enableGraphicsWorldRender();
+		engine.enablePhysicsWorldRender();
+
 	}
 
 	public void setEarPerimeters() {
@@ -226,6 +277,14 @@ public class MyGame extends VariableFrameRateGame {
 		person.setLocalLocation(new Vector3f(personloc.x(), (height + 0.75f), personloc.z()));
 
 		processNetworking((float)elapsTime);
+
+		// MAKE PHYSICS OBJECT ATTACH TO GRAPHICS OBJECT
+		if (person.getPhysicsObject() != null) {
+			Matrix4f personTransform = person.getLocalTranslation();
+			double[] physicsTransform = toDoubleArray(personTransform.get(vals));
+			person.getPhysicsObject().setTransform(physicsTransform);
+		}
+		checkForCollisions();
 	}
 
 	private void positionCameraBehind() {
@@ -303,8 +362,66 @@ public class MyGame extends VariableFrameRateGame {
 				personS.stopAnimation();
 				break;
 			}
+			case KeyEvent.VK_SPACE: {
+				System.out.println("starting physics");
+				running = true;
+				break;
+			}
 		}
 		super.keyPressed(e);
+	}
+
+	// utility functions for physics
+
+	private float[] toFloatArray(double[] arr) {
+		if (arr == null) {
+			return null;
+		} 
+		int n = arr.length;
+		float[] ret = new float[n];
+		for (int i = 0; i < n; i++) {
+			ret[i] = (float) arr[i];
+		}
+		return ret;
+	}
+
+	private double[] toDoubleArray(float[] arr) {
+		if (arr == null) {
+			return null;
+		}
+		int n = arr.length;
+		double[] ret = new double[n];
+		for (int i = 0; i < n; i++) {
+			ret[i] = (double) arr[i];
+		}
+		return ret;
+	}
+
+	private void checkForCollisions() {
+		com.bulletphysics.dynamics.DynamicsWorld dynamicsWorld;
+		com.bulletphysics.collision.broadphase.Dispatcher dispatcher;
+		com.bulletphysics.collision.narrowphase.PersistentManifold manifold;
+		com.bulletphysics.dynamics.RigidBody object1, object2;
+		com.bulletphysics.collision.narrowphase.ManifoldPoint contactPoint;
+
+		dynamicsWorld = ((JBulletPhysicsEngine)physicsEngine).getDynamicsWorld();
+		dispatcher = dynamicsWorld.getDispatcher();
+		int manifoldCount = dispatcher.getNumManifolds();
+		for (int i = 0; i < manifoldCount; i++) {
+			manifold = dispatcher.getManifoldByIndexInternal(i);
+			object1 = (com.bulletphysics.dynamics.RigidBody)manifold.getBody0();
+			object2 = (com.bulletphysics.dynamics.RigidBody)manifold.getBody1();
+			JBulletPhysicsObject obj1 = JBulletPhysicsObject.getJBulletPhysicsObject(object1);
+			JBulletPhysicsObject obj2 = JBulletPhysicsObject.getJBulletPhysicsObject(object2);
+			for (int j = 0; j < manifold.getNumContacts(); j++) {
+				contactPoint = manifold.getContactPoint(j);
+				if (contactPoint.getDistance() < 0.0f) {
+					//collision object
+					System.out.println("hit between " + obj1 + "and " + obj2);
+					break;
+				}
+			}
+		}
 	}
 
 	// ---------- NETWORKING SECTION ----------------
