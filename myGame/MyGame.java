@@ -232,7 +232,14 @@ public class MyGame extends VariableFrameRateGame {
 		im.associateActionWithAllKeyboards(
 				net.java.games.input.Component.Identifier.Key.DOWN, DownAction,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		// LOGITECH F310
+		InputController move = new InputController(this, "move");
+		InputController turn = new InputController(this, "turn");
+		InputController wave = new InputController(this, "wave");
 
+		im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.Y, move, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.RX, turn, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
+		im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.Button._0 , wave, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		setupNetworking();
 
 		// initialize physics system
@@ -388,6 +395,10 @@ public class MyGame extends VariableFrameRateGame {
 
 	public GameObject getPerson() {
 		return person;
+	}
+
+	public AnimatedShape getPersonAnimatedShape() {
+		return personS;
 	}
 
 	private void switchAvatar(ObjShape shape, TextureImage texture) {
