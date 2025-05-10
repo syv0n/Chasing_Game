@@ -75,7 +75,7 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 					System.err.println("Malformed isNear message: " + message);
 					return;
 				}
-
+				
 				try {
 					UUID clientID = UUID.fromString(messageTokens[1]);
 					handleNearTiming(clientID);
