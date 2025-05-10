@@ -59,7 +59,7 @@ public class MyGame extends VariableFrameRateGame {
 
 	// physics engine
 	private PhysicsEngine physicsEngine;
-	private PhysicsObject caps1P, caps2P, planeP;
+	private PhysicsObject caps1P, caps2P, planeP, plane2P;
 	private boolean running = false;
 	private float vals[] = new float[16];
 
@@ -128,7 +128,7 @@ public class MyGame extends VariableFrameRateGame {
 		Matrix4f initialTranslation, initialScale, initialRotation;
 
 		person = new GameObject(GameObject.root(), personS, persontx);
-		initialTranslation = new Matrix4f().translation(0, 1, 0);
+		initialTranslation = new Matrix4f().translation(5, 1, -5);
 		initialScale = new Matrix4f().scaling(0.2f);
 		person.setLocalTranslation(initialTranslation);
 		person.setLocalScale(initialScale);
@@ -161,7 +161,7 @@ public class MyGame extends VariableFrameRateGame {
 		Box.setLocalScale(initialScale);
 
 		sun = new GameObject(GameObject.root(), sphS);
-		initialTranslation = (new Matrix4f()).translation(5, 1, 5);
+		initialTranslation = (new Matrix4f()).translation(5, 3, 5);
 		initialScale = (new Matrix4f()).scaling(0.5f);
 		sun.setLocalTranslation(initialTranslation);
 		sun.setLocalScale(initialScale);
@@ -240,7 +240,7 @@ public class MyGame extends VariableFrameRateGame {
 		physicsEngine = engine.getSceneGraph().getPhysicsEngine();
 		physicsEngine.setGravity(gravity);
 
-		float up[] = {0, 1, 0};
+		float up[] = {0, 1f, 0};
 		float radius = 0.6f;
 		float height = 0.35f;
 		double[] tempTransform;
@@ -251,9 +251,14 @@ public class MyGame extends VariableFrameRateGame {
 		caps1P.setBounciness(0.8f);
 		person.setPhysicsObject(caps1P);
 
-		planeP = (engine.getSceneGraph()).addPhysicsStaticPlane(tempTransform, up, 0.0f);
-		planeP.setBounciness(1.0f);
+		planeP = (engine.getSceneGraph()).addPhysicsStaticPlane(tempTransform, up, -1.0f);
+		planeP.setBounciness(0.3f);
 		plane.setPhysicsObject(planeP);
+
+		caps2P = (engine.getSceneGraph()).addPhysicsSphere(1.0f, tempTransform, height);
+		caps2P.setBounciness(0.8f);
+		sun.setPhysicsObject(caps2P);
+		sun.getPhysicsObject().setDamping(0.5f, 0.6f);
 
 		engine.enableGraphicsWorldRender();
 		engine.enablePhysicsWorldRender();
@@ -299,6 +304,27 @@ public class MyGame extends VariableFrameRateGame {
 			double[] physicsTransform = toDoubleArray(personTransform.get(vals));
 			person.getPhysicsObject().setTransform(physicsTransform);
 		}
+
+		if (running) {
+			AxisAngle4f aa = new AxisAngle4f();
+			Matrix4f mat = new Matrix4f();
+			Matrix4f mat2 = new Matrix4f().identity();
+			Matrix4f mat3 = new Matrix4f().identity();
+
+			physicsEngine.update((float) elapsTime);
+			if (sun.getPhysicsObject() != null) {
+				// set translation
+				mat.set(toFloatArray(sun.getPhysicsObject().getTransform()));
+				mat2.set(3,0,mat.m30());
+				mat2.set(3,1,mat.m31());
+				mat2.set(3,2,mat.m32());
+				sun.setLocalTranslation(mat2);
+// set rotation
+				mat.getRotation(aa);
+				mat3.rotation(aa);
+				sun.setLocalRotation(mat3);
+			}
+		}
 		checkForCollisions();
 	}
 
@@ -313,12 +339,12 @@ public class MyGame extends VariableFrameRateGame {
 
 	private void terra() {
 		Vector3f loc = person.getWorldLocation();
-		Vector3f Ball = sun.getWorldLocation();
+		//Vector3f Ball = sun.getWorldLocation();
 		float height1 = lava.getHeight(loc.x(), loc.z());
-		float height2 = lava.getHeight(Ball.x(), Ball.z());
+		//float height2 = lava.getHeight(Ball.x(), Ball.z());
 		person.setLocalLocation(new Vector3f(loc.x(), (height1 + 0.75f), loc.z()));
-		if (!inGoal(sun))
-			sun.setLocalLocation(new Vector3f(Ball.x(), height2 + .75f, Ball.z()));
+		//if (!inGoal(sun))
+			//sun.setLocalLocation(new Vector3f(Ball.x(), height2 + .75f, Ball.z()));
 	}
 
 	private boolean inGoal(GameObject obj) {
