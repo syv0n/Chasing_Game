@@ -21,6 +21,6 @@ public class leftAction extends AbstractInputAction{
         float keyValue = e.getValue();
         if (keyValue > -.2 && keyValue < .2) return;
         av = game.getPerson();
-        av.yaw(-1f);
+        av.yaw(-3f);
     }
 }
