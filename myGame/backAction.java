@@ -14,9 +14,11 @@ public class backAction extends AbstractInputAction {
     private Vector4f fwdDirection;
     private Camera cam;
     private float maxDist = 7f;
+    private ProtocolClient protClient;
 
-    public backAction(MyGame g) {
-        game = g;
+    public backAction(MyGame g, ProtocolClient p) {
+        this.game = g;
+        this.protClient = p;
     }
 
     @Override
@@ -28,6 +30,7 @@ public class backAction extends AbstractInputAction {
         fwdDirection.mul(0.1f);
         newPosition = oldPosition.add(fwdDirection.x(),
                 fwdDirection.y(), fwdDirection.z());
-        if (!game.isBlocked(newPosition))
-            av.setLocalLocation(newPosition);    }
+        av.setLocalLocation(newPosition);
+        protClient.sendMoveMessage(av.getWorldLocation());
+    }
 }

@@ -18,10 +18,12 @@ public class InputController extends AbstractInputAction {
     private float turnSpeed = 3f;
     private float moveSpeed = 0.15f;
     private AnimatedShape personS;
+    private ProtocolClient protClient;
 
-    public InputController(MyGame game, String actionType) {
+    public InputController(MyGame game, String actionType, ProtocolClient p) {
         this.game = game;
         this.actionType = actionType;
+        this.protClient = p;
     }
 
     @Override
@@ -41,9 +43,9 @@ public class InputController extends AbstractInputAction {
                 fwdDirection.mul(-value * moveSpeed);
 
                 newPosition = oldPosition.add(fwdDirection.x(), fwdDirection.y(), fwdDirection.z());
-                if (!game.isBlocked(newPosition)) {
-                    person.setLocalLocation(newPosition);
-                }
+                person.setLocalLocation(newPosition);
+                protClient.sendMoveMessage(person.getWorldLocation());
+
                 break;
             case "turn":
                 float turnAmount = value;

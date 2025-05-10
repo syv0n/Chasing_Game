@@ -99,6 +99,9 @@ public class MyGame extends VariableFrameRateGame {
 		planeS = new Plane();
 		BoxS = new Cube();
 		sphS = new Sphere();
+
+		ghostS = new Sphere();
+		npcS = new Cube();
 	}
 
 	@Override
@@ -114,6 +117,9 @@ public class MyGame extends VariableFrameRateGame {
 		// player characters
 		dragontx = new TextureImage("DragonFolk.png");
 		persontx = new TextureImage("person.png");
+
+		ghostT = new TextureImage("redDolphin.jpg");
+		npctx = new TextureImage("redDolphin.jpg");
 	}
 
 	@Override
@@ -206,9 +212,10 @@ public class MyGame extends VariableFrameRateGame {
 		//(engine.getRenderSystem().getViewport("MAIN").getCamera()).setLocation(new Vector3f(0, 0, 5));
 		positionCameraBehind();
 		im = engine.getInputManager();
+		setupNetworking();
 
-		fwdAction FwdAction = new fwdAction(this);
-		backAction BackAction = new backAction(this);
+		fwdAction FwdAction = new fwdAction(this, protClient);
+		backAction BackAction = new backAction(this, protClient);
 		leftAction LeftAction = new leftAction(this);
 		rightAction RightAction = new rightAction(this);
 		upAction UpAction = new upAction(this);
@@ -233,14 +240,13 @@ public class MyGame extends VariableFrameRateGame {
 				net.java.games.input.Component.Identifier.Key.DOWN, DownAction,
 				IInputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		// LOGITECH F310
-		InputController move = new InputController(this, "move");
-		InputController turn = new InputController(this, "turn");
-		InputController wave = new InputController(this, "wave");
+		InputController move = new InputController(this, "move", protClient);
+		InputController turn = new InputController(this, "turn", protClient);
+		InputController wave = new InputController(this, "wave", protClient);
 
 		im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.Y, move, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.RX, turn, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
 		im.associateActionWithAllGamepads(net.java.games.input.Component.Identifier.Axis.Button._0 , wave, InputManager.INPUT_ACTION_TYPE.REPEAT_WHILE_DOWN);
-		setupNetworking();
 
 		// initialize physics system
 		float[] gravity = {0f, -5f, 0f};
@@ -301,12 +307,13 @@ public class MyGame extends VariableFrameRateGame {
 		Vector3f hud2Color = new Vector3f(0, 0, 1);
 		(engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, 15, 15);
 		(engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, 500, 15);
+
 		im.update((float) elapsTime);
 		positionCameraBehind();
+		processNetworking((float)elapsTime);
 
 		terra();
 
-		processNetworking((float)elapsTime);
 
 		// MAKE PHYSICS OBJECT ATTACH TO GRAPHICS OBJECT
 		if (person.getPhysicsObject() != null) {

@@ -1,6 +1,7 @@
 package myGame;
 
 import tage.Camera;
+import tage.*;
 import tage.GameObject;
 import tage.input.action.AbstractInputAction;
 import net.java.games.input.Event;
@@ -14,9 +15,11 @@ public class fwdAction extends AbstractInputAction {
     private Vector3f oldPosition, newPosition, camDirection;
     private Vector4f fwdDirection;
     private float maxDist = 7f;
+    private ProtocolClient protClient;
 
-    public fwdAction(MyGame g) {
-        game = g;
+    public fwdAction(MyGame g, ProtocolClient p) {
+        this.game = g;
+        this.protClient = p;
     }
 
     @Override
@@ -30,6 +33,7 @@ public class fwdAction extends AbstractInputAction {
         fwdDirection.mul(0.1f);
         newPosition = oldPosition.add(fwdDirection.x(),
                 fwdDirection.y(), fwdDirection.z());
-if (!game.isBlocked(newPosition))
-            av.setLocalLocation(newPosition);    }
+        av.setLocalLocation(newPosition);
+        protClient.sendMoveMessage(av.getWorldLocation());
+    }
 }

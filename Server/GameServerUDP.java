@@ -70,8 +70,18 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 			}
 
 			if(messageTokens[0].compareTo("isNear") == 0) {
-				UUID clientID = UUID.fromString(messageTokens[1]);
-				handleNearTiming(clientID);
+				// Add length check and UUID validation
+				if(messageTokens.length < 2) {
+					System.err.println("Malformed isNear message: " + message);
+					return;
+				}
+
+				try {
+					UUID clientID = UUID.fromString(messageTokens[1]);
+					handleNearTiming(clientID);
+				} catch (IllegalArgumentException e) {
+					System.err.println("Invalid UUID in isNear message: " + messageTokens[1]);
+				}
 			}
 			
 			// MOVE --- Case where server receives a move message
