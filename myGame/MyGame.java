@@ -133,7 +133,7 @@ public class MyGame extends VariableFrameRateGame {
 
 		//build terrain
 		lava = new GameObject(GameObject.root(), lavaS, lavatx);
-		initialTranslation = new Matrix4f().translation(0f,0f,0f);
+		initialTranslation = new Matrix4f().translation(0f,-0.1f,0f);
 		lava.setLocalTranslation(initialTranslation);
 		initialScale = new Matrix4f().scaling(20.0f, 1.0f, 20.0f);
 		lava.setLocalScale(initialScale);
@@ -141,13 +141,17 @@ public class MyGame extends VariableFrameRateGame {
 		
 		lava.getRenderStates().setTiling(1);
 		lava.getRenderStates().setTileFactor(10);
+		lava.getRenderStates().hasDepthTesting(true);
 
 		// build plane
 		plane = new GameObject(GameObject.root(), planeS, groundtx);
-		initialTranslation = new Matrix4f().translation(0,0.3f,0);
-		initialScale = new Matrix4f().scaling(10f);
+		initialTranslation = new Matrix4f().translation(0,0,0);
+		initialScale = new Matrix4f().scaling(20.0f, 1.0f, 20.0f);
 		plane.setLocalTranslation(initialTranslation);
 		plane.setLocalScale(initialScale);
+		plane.getRenderStates().hasDepthTesting(true);
+		plane.getRenderStates().setColor(new Vector3f(1,1,1));
+
 	}
 
 	@Override
@@ -303,7 +307,7 @@ public class MyGame extends VariableFrameRateGame {
 
 	// CAMERA POV of AVATAR/PLAYER
 	private void povCamera() {
-
+		
 	}
 
 	// CAMERA positioned to look behind player
