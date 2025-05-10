@@ -1,15 +1,24 @@
-import tage.ai.behaviortrees.BTCondition;
+import tage.ai.behaviortrees.*;
 
-public class GetBig extends BTCondition {
+public class GetBig extends BTAction {
     NPC npc;
-
+    
     public GetBig(NPC n) {
-        super(false);
         npc = n;
     }
 
-    protected boolean check() {
+    @Override
+    protected void onInitialize() {
+    }
+
+    @Override
+    protected BTStatus update(float elapsedTime) {
         npc.getBig();
-        return true;
+        return BTStatus.BH_SUCCESS;
+    }
+
+    @Override
+    protected void onTerminate(BTStatus status) {
+        
     }
 }

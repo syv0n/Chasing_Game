@@ -16,7 +16,8 @@ public class NPCcontroller {
     }
 
     public void setNearFlag(boolean flag) {
-        nearFlag = flag;
+        System.out.println(nearFlag +"->" + flag);
+        this.nearFlag = flag;
     }
 
     public NPC getNPC() {

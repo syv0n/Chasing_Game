@@ -30,7 +30,6 @@ public class ProtocolClient extends GameConnectionClient
     @Override
     protected void processPacket(Object message)
     {	String strMessage = (String)message;
-        System.out.println("message received -->" + strMessage);
         String[] messageTokens = strMessage.split(",");
 
         // Game specific protocol to handle the message
@@ -100,11 +99,11 @@ public class ProtocolClient extends GameConnectionClient
                 }
             }
 
-            if (messageTokens[0].compareTo("isnr") == 0) {
+            if (messageTokens[0].equals("isnr") && messageTokens.length >= 4) {
                 Vector3f NPCposition = new Vector3f(Float.parseFloat(messageTokens[1]), Float.parseFloat(messageTokens[2]), Float.parseFloat(messageTokens[3]));
                 float distance = NPCposition.distance(game.getPerson().getWorldLocation());
-                boolean isNear = distance < 1.0f;
-                String response = "isNear, " + isNear;
+                boolean isNear = distance < 4.0f;
+                String response = "isNear, " + id.toString() + ", " + isNear;
                 try {
                     sendPacket(response);
                 } catch (IOException e) {

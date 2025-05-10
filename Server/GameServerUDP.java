@@ -69,18 +69,18 @@ public class GameServerUDP extends GameConnectionServer<UUID>
 				sendNPCstart(clientID);
 			}
 
-			if(messageTokens[0].compareTo("isNear") == 0) {
-				// Add length check and UUID validation
-				if(messageTokens.length < 2) {
-					System.err.println("Malformed isNear message: " + message);
-					return;
-				}
-				
+			if (messageTokens[0].compareTo("isNear") == 0) {
 				try {
-					UUID clientID = UUID.fromString(messageTokens[1]);
-					handleNearTiming(clientID);
+					UUID clientID = UUID.fromString(messageTokens[1].trim());
+					boolean isNear = Boolean.parseBoolean(messageTokens[2].trim());
+					
+					if (isNear) {
+						handleNearTiming(clientID);
+					}
+					npcCtrl.setNearFlag(isNear);
 				} catch (IllegalArgumentException e) {
-					System.err.println("Invalid UUID in isNear message: " + messageTokens[1]);
+					System.err.printf("ERROR: Invalid isNear message '%s'. Reason: %s%n", 
+						message, e.getMessage());
 				}
 			}
 			
