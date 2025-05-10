@@ -28,6 +28,6 @@ public class backAction extends AbstractInputAction {
         fwdDirection.mul(0.1f);
         newPosition = oldPosition.add(fwdDirection.x(),
                 fwdDirection.y(), fwdDirection.z());
-        av.setLocalLocation(newPosition);
-    }
+        if (!game.isBlocked(newPosition))
+            av.setLocalLocation(newPosition);    }
 }
