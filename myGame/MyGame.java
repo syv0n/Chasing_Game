@@ -251,6 +251,7 @@ public class MyGame extends VariableFrameRateGame {
 		float radius = 0.6f;
 		float height = 0.35f;
 		double[] tempTransform;
+		Matrix4f initialTranslation;
 
 		Matrix4f translation = new Matrix4f(person.getLocalTranslation());
 		tempTransform = toDoubleArray(translation.get(vals));
@@ -262,7 +263,9 @@ public class MyGame extends VariableFrameRateGame {
 		planeP.setBounciness(0.3f);
 		plane.setPhysicsObject(planeP);
 
-		caps2P = (engine.getSceneGraph()).addPhysicsSphere(1.0f, tempTransform, height);
+		initialTranslation = (new Matrix4f()).translation(5, 3, 5);
+		double[] physicsTransform = toDoubleArray(initialTranslation.get(vals));
+		caps2P = (engine.getSceneGraph()).addPhysicsSphere(1.0f, physicsTransform, height);
 		caps2P.setBounciness(0.8f);
 		sun.setPhysicsObject(caps2P);
 		sun.getPhysicsObject().setDamping(0.5f, 0.6f);
@@ -326,7 +329,7 @@ public class MyGame extends VariableFrameRateGame {
 				mat2.set(3,1,mat.m31());
 				mat2.set(3,2,mat.m32());
 				sun.setLocalTranslation(mat2);
-// set rotation
+				// set rotation
 				mat.getRotation(aa);
 				mat3.rotation(aa);
 				sun.setLocalRotation(mat3);
