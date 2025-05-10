@@ -98,6 +98,7 @@ public class MyGame extends VariableFrameRateGame {
 		lavaS = new TerrainPlane(1000);
 		planeS = new Plane();
 		BoxS = new Cube();
+		sphS = new Sphere();
 	}
 
 	@Override
@@ -315,7 +316,7 @@ public class MyGame extends VariableFrameRateGame {
 		Vector3f Ball = sun.getWorldLocation();
 		float height1 = lava.getHeight(loc.x(), loc.z());
 		float height2 = lava.getHeight(Ball.x(), Ball.z());
-		person.setLocalLocation(new Vector3f(personloc.x(), (height + 0.75f), personloc.z()));
+		person.setLocalLocation(new Vector3f(loc.x(), (height1 + 0.75f), loc.z()));
 		if (!inGoal(sun))
 			sun.setLocalLocation(new Vector3f(Ball.x(), height2 + .75f, Ball.z()));
 	}
@@ -411,14 +412,14 @@ public class MyGame extends VariableFrameRateGame {
 				break;
 			}
 			case KeyEvent.VK_B: {
-				Vector3f dolPos = dol.getWorldLocation();
+				Vector3f perPos = person.getWorldLocation();
 				Vector3f ballPos = sun.getWorldLocation();
 
 				if (!inGoal(sun)) {
 					// Check distance
-					if (dolPos.distance(ballPos) < 2.5f) {
+					if (perPos.distance(ballPos) < 2.5f) {
 						Vector4f forward = new Vector4f(0f, 0f, 1f, 0f);
-						forward.mul(dol.getWorldRotation());
+						forward.mul(person.getWorldRotation());
 
 						//Add some kick
 						Vector3f kickDir = new Vector3f(forward.x, forward.y, forward.z).normalize().mul(2f);
@@ -432,7 +433,6 @@ public class MyGame extends VariableFrameRateGame {
 					}
 				}
 			}
-		}
 		}
 		super.keyPressed(e);
 	}
