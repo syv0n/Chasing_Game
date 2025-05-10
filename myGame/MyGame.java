@@ -45,8 +45,8 @@ public class MyGame extends VariableFrameRateGame {
 
 	private double lastFrameTime, currFrameTime, elapsTime;
 
-	private GameObject lava, dragon, person, plane;
-	private ObjShape ghostS, lavaS, dragonS, npcS, planeS;
+	private GameObject lava, dragon, person, plane, Box, sun;
+	private ObjShape ghostS, lavaS, dragonS, npcS, planeS, BoxS, sphS;
 	private TextureImage ghostT, lavatx, heightmap, dragontx, persontx, npctx, groundtx;
 	private Light light1;
 	private AnimatedShape personS;
@@ -97,6 +97,7 @@ public class MyGame extends VariableFrameRateGame {
 		// terrain + plane
 		lavaS = new TerrainPlane(1000);
 		planeS = new Plane();
+		BoxS = new Cube();
 	}
 
 	@Override
@@ -104,7 +105,7 @@ public class MyGame extends VariableFrameRateGame {
 
 		// terrain
 		lavatx = new TextureImage("10001.png");
-		heightmap = new TextureImage("testheightmap.png");
+		heightmap = new TextureImage("something.png");
 
 		// plane 
 		groundtx = new TextureImage("ground.jpg");
@@ -152,6 +153,17 @@ public class MyGame extends VariableFrameRateGame {
 		plane.getRenderStates().hasDepthTesting(true);
 		plane.getRenderStates().setColor(new Vector3f(1,1,1));
 
+		Box = new GameObject(GameObject.root(), BoxS);
+		initialTranslation = (new Matrix4f()).translation(7, 1, 7);
+		initialScale = (new Matrix4f()).scaling(1.0f);
+		Box.setLocalTranslation(initialTranslation);
+		Box.setLocalScale(initialScale);
+
+		sun = new GameObject(GameObject.root(), sphS);
+		initialTranslation = (new Matrix4f()).translation(5, 1, 5);
+		initialScale = (new Matrix4f()).scaling(0.5f);
+		sun.setLocalTranslation(initialTranslation);
+		sun.setLocalScale(initialScale);
 	}
 
 	@Override
@@ -276,9 +288,7 @@ public class MyGame extends VariableFrameRateGame {
 		im.update((float) elapsTime);
 		positionCameraBehind();
 
-		Vector3f personloc = person.getWorldLocation();
-		float height = lava.getHeight(personloc.x(), personloc.z());
-		person.setLocalLocation(new Vector3f(personloc.x(), (height + 0.75f), personloc.z()));
+		terra();
 
 		processNetworking((float)elapsTime);
 
@@ -289,6 +299,35 @@ public class MyGame extends VariableFrameRateGame {
 			person.getPhysicsObject().setTransform(physicsTransform);
 		}
 		checkForCollisions();
+	}
+
+	public boolean isBlocked(Vector3f pos) {
+		float height = lava.getHeight(pos.x(), pos.z());
+
+		if (height > 1.0f) {
+			return true;
+		}
+		return false;
+	}
+
+	private void terra() {
+		Vector3f loc = person.getWorldLocation();
+		Vector3f Ball = sun.getWorldLocation();
+		float height1 = lava.getHeight(loc.x(), loc.z());
+		float height2 = lava.getHeight(Ball.x(), Ball.z());
+		person.setLocalLocation(new Vector3f(personloc.x(), (height + 0.75f), personloc.z()));
+		if (!inGoal(sun))
+			sun.setLocalLocation(new Vector3f(Ball.x(), height2 + .75f, Ball.z()));
+	}
+
+	private boolean inGoal(GameObject obj) {
+		Vector3f Bloc = Box.getWorldLocation();
+		Vector3f Oloc = obj.getWorldLocation();
+
+		float tolerance = 1.0f;
+
+		return Math.abs(Oloc.x() - Bloc.x()) < tolerance &&
+				Math.abs(Oloc.z() - Bloc.z()) < tolerance;
 	}
 
 	private void positionCameraBehind() {
@@ -371,6 +410,29 @@ public class MyGame extends VariableFrameRateGame {
 				running = true;
 				break;
 			}
+			case KeyEvent.VK_B: {
+				Vector3f dolPos = dol.getWorldLocation();
+				Vector3f ballPos = sun.getWorldLocation();
+
+				if (!inGoal(sun)) {
+					// Check distance
+					if (dolPos.distance(ballPos) < 2.5f) {
+						Vector4f forward = new Vector4f(0f, 0f, 1f, 0f);
+						forward.mul(dol.getWorldRotation());
+
+						//Add some kick
+						Vector3f kickDir = new Vector3f(forward.x, forward.y, forward.z).normalize().mul(2f);
+
+						//Move the ball
+						Vector3f newBallPos = ballPos.add(kickDir);
+						sun.setLocalLocation(newBallPos);
+
+						System.out.println("Ball Kicked!");
+						break;
+					}
+				}
+			}
+		}
 		}
 		super.keyPressed(e);
 	}
