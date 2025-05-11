@@ -223,24 +223,27 @@ public class MyGame extends VariableFrameRateGame {
 
 		// set lights on balls
 		ballLight1 = new Light();
-		ballLight1.setDiffuse(1, 0, 0);
-		ballLight1.setSpecular(1, 0, 0);
+		ballLight1.setType(Light.LightType.SPOTLIGHT);
+		ballLight1.setDiffuse(2, 0, 0);
+		ballLight1.setSpecular(2, 0, 0);
 		ballLight1.setConstantAttenuation(1);
 		ballLight1.setLinearAttenuation(0.2f);
 		ballLight1.setQuadraticAttenuation(0.1f);
 		engine.getSceneGraph().addLight(ballLight1);
 
 		ballLight2 = new Light();
-		ballLight2.setDiffuse(0, 1, 0);
-		ballLight2.setSpecular(0, 1, 0);
+		ballLight2.setType(Light.LightType.SPOTLIGHT);
+		ballLight2.setDiffuse(0, 2, 0);
+		ballLight2.setSpecular(0, 2, 0);
 		ballLight2.setConstantAttenuation(1);
 		ballLight2.setLinearAttenuation(0.2f);
 		ballLight2.setQuadraticAttenuation(0.1f);
 		engine.getSceneGraph().addLight(ballLight2);
 
 		ballLight3 = new Light();
-		ballLight3.setDiffuse(0, 0, 1);
-		ballLight3.setSpecular(0, 0, 1);
+		ballLight3.setType(Light.LightType.SPOTLIGHT);
+		ballLight3.setDiffuse(0, 0, 2);
+		ballLight3.setSpecular(0, 0, 2);
 		ballLight3.setConstantAttenuation(1);
 		ballLight3.setLinearAttenuation(0.2f);
 		ballLight3.setQuadraticAttenuation(0.1f);
