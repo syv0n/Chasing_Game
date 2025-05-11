@@ -271,25 +271,25 @@ public class MyGame extends VariableFrameRateGame {
 		Goal2 = audioMgr.createAudioResource("Game-Music.wav", AudioResourceType.AUDIO_STREAM);
 
 
-		ballS1 = new Sound(Goal1, SoundType.SOUND_EFFECT, 100, true);
+		ballS1 = new Sound(Goal1, SoundType.SOUND_EFFECT, 150, true);
 		ballS1.initialize(audioMgr);
-		ballS1.setMaxDistance(10.0f);
-		ballS1.setMinDistance(0.5f);
+		ballS1.setMaxDistance(15.0f);
+		ballS1.setMinDistance(1.3f);
 		ballS1.setRollOff(5.0f);
 
-		ballS2 = new Sound(Goal1, SoundType.SOUND_EFFECT, 100, true);
+		ballS2 = new Sound(Goal1, SoundType.SOUND_EFFECT, 150, true);
 		ballS2.initialize(audioMgr);
-		ballS2.setMaxDistance(10.0f);
-		ballS2.setMinDistance(0.5f);
+		ballS2.setMaxDistance(15.0f);
+		ballS2.setMinDistance(1.3f);
 		ballS2.setRollOff(5.0f);
 
-		ballS3 = new Sound(Goal1, SoundType.SOUND_EFFECT, 100, true);
+		ballS3 = new Sound(Goal1, SoundType.SOUND_EFFECT, 150, true);
 		ballS3.initialize(audioMgr);
-		ballS3.setMaxDistance(10.0f);
-		ballS3.setMinDistance(0.5f);
+		ballS3.setMaxDistance(15.0f);
+		ballS3.setMinDistance(1.3f);
 		ballS3.setRollOff(5.0f);
 
-		GameMusic = new Sound(Goal2, SoundType.SOUND_MUSIC, 10, true);
+		GameMusic = new Sound(Goal2, SoundType.SOUND_MUSIC, 8, true);
 		GameMusic.initialize(audioMgr);
 		GameMusic.play();
 
