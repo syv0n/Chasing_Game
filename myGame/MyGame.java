@@ -48,7 +48,7 @@ public class MyGame extends VariableFrameRateGame {
 
 	private double lastFrameTime, currFrameTime, elapsTime;
 
-	private GameObject lava, dragon, person, plane, box1, box2 , ball1, ball2;
+	private GameObject lava, dragon, person, plane, box1, box2, box3 , ball1, ball2, ball3;
 	private ObjShape ghostS, lavaS, dragonS, npcS, planeS, BoxS, sphS;
 	private TextureImage ghostT, lavatx, heightmap, dragontx, persontx, npctx, groundtx;
 	private Light light1;
@@ -62,7 +62,7 @@ public class MyGame extends VariableFrameRateGame {
 
 	// physics engine
 	private PhysicsEngine physicsEngine;
-	private PhysicsObject caps1P, sph1, sph2, planeP;
+	private PhysicsObject caps1P, sph1, sph2, sph3, planeP;
 	private boolean running = false;
 	private float vals[] = new float[16];
 
@@ -72,6 +72,9 @@ public class MyGame extends VariableFrameRateGame {
 	private float amtt = 0.0f;
 	private int score = 0;
 	private boolean ballScored = false;
+	private boolean Goal1 = true;
+	private boolean Goal2 = true;
+	private boolean Goal3 = true;
 
 	List<GameObject> physicsObjects = new ArrayList<>();
 
@@ -179,6 +182,12 @@ public class MyGame extends VariableFrameRateGame {
 		box2.setLocalTranslation(initialTranslation);
 		box2.setLocalScale(initialScale);
 
+		box3 = new GameObject(GameObject.root(), BoxS);
+		initialTranslation = (new Matrix4f()).translation(3, 1, -7);
+		initialScale = (new Matrix4f()).scaling(1.0f);
+		box3.setLocalTranslation(initialTranslation);
+		box3.setLocalScale(initialScale);
+
 		ball1 = new GameObject(GameObject.root(), sphS);
 		initialTranslation = (new Matrix4f()).translation(5, 2, 3);
 		initialScale = (new Matrix4f()).scaling(0.5f);
@@ -190,6 +199,12 @@ public class MyGame extends VariableFrameRateGame {
 		initialScale = (new Matrix4f()).scaling(0.5f);
 		ball2.setLocalTranslation(initialTranslation);
 		ball2.setLocalScale(initialScale);
+
+		ball3 = new GameObject(GameObject.root(), sphS);
+		initialTranslation = (new Matrix4f()).translation(-7, 2, 4);
+		initialScale = (new Matrix4f()).scaling(0.5f);
+		ball3.setLocalTranslation(initialTranslation);
+		ball3.setLocalScale(initialScale);
 	}
 
 	@Override
@@ -302,11 +317,19 @@ public class MyGame extends VariableFrameRateGame {
 		ball2.setPhysicsObject(sph2);
 		ball2.getPhysicsObject().setDamping(0.5f, 0.6f);
 
+		initialTranslation = new Matrix4f(ball3.getLocalTranslation());
+		tempTransform = toDoubleArray(initialTranslation.get(vals));
+		sph3 = (engine.getSceneGraph()).addPhysicsSphere(1.0f, tempTransform, height);
+		sph3.setBounciness(0.8f);
+		ball3.setPhysicsObject(sph3);
+		ball3.getPhysicsObject().setDamping(0.5f, 0.6f);
+
 		engine.enableGraphicsWorldRender();
 		engine.enablePhysicsWorldRender();
 
 		physicsObjects.add(ball1);
 		physicsObjects.add(ball2);
+		physicsObjects.add(ball3);
 	}
 
 	public void setEarPerimeters() {
@@ -326,15 +349,9 @@ public class MyGame extends VariableFrameRateGame {
 		personS.updateAnimation();
 
 		// build and set HUD
-		int elapsTimeSec = Math.round((float) elapsTime);
-		String elapsTimeStr = Integer.toString(elapsTimeSec);
-		String counterStr = Integer.toString(counter);
-		String dispStr1 = "Time = " + elapsTimeStr;
-		String dispStr2 = "Keyboard hits = " + counterStr;
+		String dispStr1 = "Score = " + score;
 		Vector3f hud1Color = new Vector3f(1, 0, 0);
-		Vector3f hud2Color = new Vector3f(0, 0, 1);
 		(engine.getHUDmanager()).setHUD1(dispStr1, hud1Color, 15, 15);
-		(engine.getHUDmanager()).setHUD2(dispStr2, hud2Color, 500, 15);
 
 		im.update((float) elapsTime);
 		positionCameraBehind();
@@ -402,6 +419,10 @@ public class MyGame extends VariableFrameRateGame {
 			physicsEngine.removeObject(ball1.getPhysicsObject().getUID());
 
 			ball1.setLocalLocation(box1.getWorldLocation());
+			if (Goal1){
+				Goal1 = false;
+				score++;
+			}
 		}
 
 		if (inGoal(ball2, box2)) {
@@ -411,6 +432,23 @@ public class MyGame extends VariableFrameRateGame {
 			physicsEngine.removeObject(ball2.getPhysicsObject().getUID());
 
 			ball2.setLocalLocation(box2.getWorldLocation());
+			if (Goal2){
+				Goal2 = false;
+				score++;
+			}
+		}
+
+		if (inGoal(ball3, box3)) {
+			ball3.getPhysicsObject().setLinearVelocity(new float[] {0f, 0f, 0f});
+			ball3.getPhysicsObject().setAngularVelocity(new float[] {0f, 0f, 0f});
+
+			physicsEngine.removeObject(ball3.getPhysicsObject().getUID());
+
+			ball3.setLocalLocation(box3.getWorldLocation());
+			if (Goal3) {
+				Goal3 = false;
+				score++;
+			}
 		}
 	}
 
@@ -433,7 +471,7 @@ public class MyGame extends VariableFrameRateGame {
 		Vector3f ballPos = ball.getWorldLocation();
 		Vector3f boxPos = box.getWorldLocation();
 
-		float tolerance = 0.5f; // Adjust based on object sizes
+		float tolerance = 1.0f; // Adjust based on object sizes
 
 		return Math.abs(ballPos.x() - boxPos.x()) < tolerance &&
 				Math.abs(ballPos.y() - boxPos.y()) < tolerance &&
