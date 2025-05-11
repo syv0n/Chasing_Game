@@ -51,7 +51,7 @@ public class MyGame extends VariableFrameRateGame {
 	private GameObject lava, dragon, person, plane, box1, box2, box3 , ball1, ball2, ball3;
 	private ObjShape ghostS, lavaS, dragonS, npcS, planeS, BoxS, sphS;
 	private TextureImage ghostT, lavatx, heightmap, dragontx, persontx, npctx, groundtx;
-	private Light light1;
+	private Light light1, ballLight1, ballLight2, ballLight3;
 	private AnimatedShape personS;
 
 	private String serverAddress;
@@ -213,6 +213,42 @@ public class MyGame extends VariableFrameRateGame {
 		light1 = new Light();
 		light1.setLocation(new Vector3f(5.0f, 4.0f, 2.0f));
 		(engine.getSceneGraph()).addLight(light1);
+
+		// set lights on balls
+		ballLight1 = new Light();
+		ballLight1.setDiffuse(1, 0, 0);
+		ballLight1.setSpecular(1, 0, 0);
+		ballLight1.setConstantAttenuation(1);
+		ballLight1.setLinearAttenuation(0.2f);
+		ballLight1.setQuadraticAttenuation(0.1f);
+		engine.getSceneGraph().addLight(ballLight1);
+
+		ballLight2 = new Light();
+		ballLight2.setDiffuse(0, 1, 0);
+		ballLight2.setSpecular(0, 1, 0);
+		ballLight2.setConstantAttenuation(1);
+		ballLight2.setLinearAttenuation(0.2f);
+		ballLight2.setQuadraticAttenuation(0.1f);
+		engine.getSceneGraph().addLight(ballLight2);
+
+		ballLight3 = new Light();
+		ballLight3.setDiffuse(0, 0, 1);
+		ballLight3.setSpecular(0, 0, 1);
+		ballLight3.setConstantAttenuation(1);
+		ballLight3.setLinearAttenuation(0.2f);
+		ballLight3.setQuadraticAttenuation(0.1f);
+		engine.getSceneGraph().addLight(ballLight3);
+	}
+
+	private void updateLightPositions() {
+		Vector3f pos1 = ball1.getWorldLocation();
+		ballLight1.setLocation(new Vector3f(pos1.x(), pos1.y()+1f, pos1.z()));
+
+		Vector3f pos2 = ball2.getWorldLocation();
+		ballLight2.setLocation(new Vector3f(pos2.x(), pos2.y()+1f, pos2.z()));
+
+		Vector3f pos3 = ball3.getWorldLocation();
+		ballLight3.setLocation(new Vector3f(pos3.x(), pos3.y()+1f, pos3.z()));
 	}
 
 	@Override
@@ -324,8 +360,8 @@ public class MyGame extends VariableFrameRateGame {
 		ball3.setPhysicsObject(sph3);
 		ball3.getPhysicsObject().setDamping(0.5f, 0.6f);
 
-		engine.enableGraphicsWorldRender();
-		engine.enablePhysicsWorldRender();
+		//engine.enableGraphicsWorldRender();
+		//engine.enablePhysicsWorldRender();
 
 		physicsObjects.add(ball1);
 		physicsObjects.add(ball2);
@@ -450,6 +486,8 @@ public class MyGame extends VariableFrameRateGame {
 				score++;
 			}
 		}
+
+		updateLightPositions();
 	}
 
 	public boolean isBlocked(Vector3f pos) {
