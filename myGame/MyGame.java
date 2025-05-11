@@ -8,7 +8,10 @@ import tage.audio.*;
 
 import net.java.games.input.*;
 import net.java.games.input.Component.Identifier.*;
+
+import java.sql.Array;
 import java.util.*;
+import java.util.List;
 import java.util.UUID;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -45,7 +48,7 @@ public class MyGame extends VariableFrameRateGame {
 
 	private double lastFrameTime, currFrameTime, elapsTime;
 
-	private GameObject lava, dragon, person, plane, Box, sun;
+	private GameObject lava, dragon, person, plane, box1, box2 , ball1, ball2;
 	private ObjShape ghostS, lavaS, dragonS, npcS, planeS, BoxS, sphS;
 	private TextureImage ghostT, lavatx, heightmap, dragontx, persontx, npctx, groundtx;
 	private Light light1;
@@ -59,7 +62,7 @@ public class MyGame extends VariableFrameRateGame {
 
 	// physics engine
 	private PhysicsEngine physicsEngine;
-	private PhysicsObject caps1P, caps2P, planeP, plane2P;
+	private PhysicsObject caps1P, sph1, sph2, planeP;
 	private boolean running = false;
 	private float vals[] = new float[16];
 
@@ -67,6 +70,10 @@ public class MyGame extends VariableFrameRateGame {
 	private int hellscape;
 
 	private float amtt = 0.0f;
+	private int score = 0;
+	private boolean ballScored = false;
+
+	List<GameObject> physicsObjects = new ArrayList<>();
 
 	public MyGame(String serverAddress, int serverPort, String protocol) {
 		super();
@@ -160,17 +167,29 @@ public class MyGame extends VariableFrameRateGame {
 		plane.getRenderStates().hasDepthTesting(true);
 		plane.getRenderStates().setColor(new Vector3f(1,1,1));
 
-		Box = new GameObject(GameObject.root(), BoxS);
+		box1 = new GameObject(GameObject.root(), BoxS);
 		initialTranslation = (new Matrix4f()).translation(7, 1, 7);
 		initialScale = (new Matrix4f()).scaling(1.0f);
-		Box.setLocalTranslation(initialTranslation);
-		Box.setLocalScale(initialScale);
+		box1.setLocalTranslation(initialTranslation);
+		box1.setLocalScale(initialScale);
 
-		sun = new GameObject(GameObject.root(), sphS);
-		initialTranslation = (new Matrix4f()).translation(5, 3, 5);
+		box2 = new GameObject(GameObject.root(), BoxS);
+		initialTranslation = (new Matrix4f()).translation(-7, 1, -7);
+		initialScale = (new Matrix4f()).scaling(1.0f);
+		box2.setLocalTranslation(initialTranslation);
+		box2.setLocalScale(initialScale);
+
+		ball1 = new GameObject(GameObject.root(), sphS);
+		initialTranslation = (new Matrix4f()).translation(5, 2, 3);
 		initialScale = (new Matrix4f()).scaling(0.5f);
-		sun.setLocalTranslation(initialTranslation);
-		sun.setLocalScale(initialScale);
+		ball1.setLocalTranslation(initialTranslation);
+		ball1.setLocalScale(initialScale);
+
+		ball2 = new GameObject(GameObject.root(), sphS);
+		initialTranslation = (new Matrix4f()).translation(-5, 2, 3);
+		initialScale = (new Matrix4f()).scaling(0.5f);
+		ball2.setLocalTranslation(initialTranslation);
+		ball2.setLocalScale(initialScale);
 	}
 
 	@Override
@@ -269,16 +288,25 @@ public class MyGame extends VariableFrameRateGame {
 		planeP.setBounciness(0.3f);
 		plane.setPhysicsObject(planeP);
 
-		initialTranslation = (new Matrix4f()).translation(5, 3, 5);
+		initialTranslation = new Matrix4f(ball1.getLocalTranslation());
 		double[] physicsTransform = toDoubleArray(initialTranslation.get(vals));
-		caps2P = (engine.getSceneGraph()).addPhysicsSphere(1.0f, physicsTransform, height);
-		caps2P.setBounciness(0.8f);
-		sun.setPhysicsObject(caps2P);
-		sun.getPhysicsObject().setDamping(0.5f, 0.6f);
+		sph1 = (engine.getSceneGraph()).addPhysicsSphere(1.0f, physicsTransform, height);
+		sph1.setBounciness(0.8f);
+		ball1.setPhysicsObject(sph1);
+		ball1.getPhysicsObject().setDamping(0.5f, 0.6f);
+
+		initialTranslation = new Matrix4f(ball2.getLocalTranslation());
+		tempTransform = toDoubleArray(initialTranslation.get(vals));
+		sph2 = (engine.getSceneGraph()).addPhysicsSphere(1.0f, tempTransform, height);
+		sph2.setBounciness(0.8f);
+		ball2.setPhysicsObject(sph2);
+		ball2.getPhysicsObject().setDamping(0.5f, 0.6f);
 
 		engine.enableGraphicsWorldRender();
 		engine.enablePhysicsWorldRender();
 
+		physicsObjects.add(ball1);
+		physicsObjects.add(ball2);
 	}
 
 	public void setEarPerimeters() {
@@ -288,11 +316,11 @@ public class MyGame extends VariableFrameRateGame {
 	}
 
 	@Override
-	public void update() {    
+	public void update() {
 
 		//sunSound.setLocation(sun.getWorldLocation());
 		//setEarPerimeters();
-		
+
 		elapsTime = System.currentTimeMillis() - lastFrameTime;
 		lastFrameTime = System.currentTimeMillis();
 		personS.updateAnimation();
@@ -310,7 +338,7 @@ public class MyGame extends VariableFrameRateGame {
 
 		im.update((float) elapsTime);
 		positionCameraBehind();
-		processNetworking((float)elapsTime);
+		processNetworking((float) elapsTime);
 
 		terra();
 
@@ -329,20 +357,61 @@ public class MyGame extends VariableFrameRateGame {
 			Matrix4f mat3 = new Matrix4f().identity();
 
 			physicsEngine.update((float) elapsTime);
-			if (sun.getPhysicsObject() != null) {
-				// set translation
-				mat.set(toFloatArray(sun.getPhysicsObject().getTransform()));
-				mat2.set(3,0,mat.m30());
-				mat2.set(3,1,mat.m31());
-				mat2.set(3,2,mat.m32());
-				sun.setLocalTranslation(mat2);
-				// set rotation
-				mat.getRotation(aa);
-				mat3.rotation(aa);
-				sun.setLocalRotation(mat3);
+			for (GameObject go : physicsObjects) {
+				if (go.getPhysicsObject() != null) {
+					mat.set(toFloatArray(go.getPhysicsObject().getTransform()));
+					float x = mat.m30();
+					float y = mat.m31();
+					float z = mat.m32();
+
+					// Terrain height at the ball's XZ position
+					float desiredHeight = lava.getHeight(x, z) + 0.75f;
+					float diff = desiredHeight - y;
+
+					// Get vertical velocity component from velocity array
+					float[] velocity = go.getPhysicsObject().getLinearVelocity();
+					float vy = velocity[1];
+
+					// Spring-damper force calculation
+					float k = 50f;  // spring strength
+					float d = 10f;  // damping
+
+					float forceY = (k * diff) - (d * vy);
+
+					// Apply force vertically at the center of the ball
+					go.getPhysicsObject().applyForce(0f, forceY, 0f, 0f, 0f, 0f);
+
+					// Update rendering transform
+					mat2.set(3, 0, x);
+					mat2.set(3, 1, y);
+					mat2.set(3, 2, z);
+					go.setLocalTranslation(mat2);
+
+					mat.getRotation(aa);
+					mat3.rotation(aa);
+					go.setLocalRotation(mat3);
+				}
 			}
+
 		}
 		checkForCollisions();
+		if (inGoal(ball1, box1)) {
+			ball1.getPhysicsObject().setLinearVelocity(new float[] {0f, 0f, 0f});
+			ball1.getPhysicsObject().setAngularVelocity(new float[] {0f, 0f, 0f});
+
+			physicsEngine.removeObject(ball1.getPhysicsObject().getUID());
+
+			ball1.setLocalLocation(box1.getWorldLocation());
+		}
+
+		if (inGoal(ball2, box2)) {
+			ball2.getPhysicsObject().setLinearVelocity(new float[] {0f, 0f, 0f});
+			ball2.getPhysicsObject().setAngularVelocity(new float[] {0f, 0f, 0f});
+
+			physicsEngine.removeObject(ball2.getPhysicsObject().getUID());
+
+			ball2.setLocalLocation(box2.getWorldLocation());
+		}
 	}
 
 	public boolean isBlocked(Vector3f pos) {
@@ -356,22 +425,19 @@ public class MyGame extends VariableFrameRateGame {
 
 	private void terra() {
 		Vector3f loc = person.getWorldLocation();
-		//Vector3f Ball = sun.getWorldLocation();
 		float height1 = lava.getHeight(loc.x(), loc.z());
-		//float height2 = lava.getHeight(Ball.x(), Ball.z());
 		person.setLocalLocation(new Vector3f(loc.x(), (height1 + 0.75f), loc.z()));
-		//if (!inGoal(sun))
-			//sun.setLocalLocation(new Vector3f(Ball.x(), height2 + .75f, Ball.z()));
 	}
 
-	private boolean inGoal(GameObject obj) {
-		Vector3f Bloc = Box.getWorldLocation();
-		Vector3f Oloc = obj.getWorldLocation();
+	private boolean inGoal(GameObject ball, GameObject box) {
+		Vector3f ballPos = ball.getWorldLocation();
+		Vector3f boxPos = box.getWorldLocation();
 
-		float tolerance = 1.0f;
+		float tolerance = 0.5f; // Adjust based on object sizes
 
-		return Math.abs(Oloc.x() - Bloc.x()) < tolerance &&
-				Math.abs(Oloc.z() - Bloc.z()) < tolerance;
+		return Math.abs(ballPos.x() - boxPos.x()) < tolerance &&
+				Math.abs(ballPos.y() - boxPos.y()) < tolerance &&
+				Math.abs(ballPos.z() - boxPos.z()) < tolerance;
 	}
 
 	private void positionCameraBehind() {
@@ -443,6 +509,28 @@ public class MyGame extends VariableFrameRateGame {
 			}
 			case KeyEvent.VK_2: {
 				switchAvatar(dragonS, dragontx);
+
+				Vector3f position = person.getWorldLocation();
+				Matrix4f rotation = new Matrix4f(person.getWorldRotation());
+				Matrix4f scale = new Matrix4f(person.getLocalScale());
+
+				// Remove game object
+				engine.getSceneGraph().removeGameObject(person);
+
+				// Create new game object
+				person = new GameObject(GameObject.root(), dragonS, dragontx);
+				person.setLocalLocation(position);
+				person.setLocalRotation(rotation);
+				person.setLocalScale(scale);
+				person.setPhysicsObject(caps1P);
+
+				// notifying the networking system
+				if (protClient != null) {
+					protClient.sendMoveMessage(person.getWorldLocation());
+				}
+
+				positionCameraBehind();
+
 				break;
 			}
 			case KeyEvent.VK_Z: {
@@ -457,28 +545,6 @@ public class MyGame extends VariableFrameRateGame {
 				System.out.println("starting physics");
 				running = true;
 				break;
-			}
-			case KeyEvent.VK_B: {
-				Vector3f perPos = person.getWorldLocation();
-				Vector3f ballPos = sun.getWorldLocation();
-
-				if (!inGoal(sun)) {
-					// Check distance
-					if (perPos.distance(ballPos) < 2.5f) {
-						Vector4f forward = new Vector4f(0f, 0f, 1f, 0f);
-						forward.mul(person.getWorldRotation());
-
-						//Add some kick
-						Vector3f kickDir = new Vector3f(forward.x, forward.y, forward.z).normalize().mul(2f);
-
-						//Move the ball
-						Vector3f newBallPos = ballPos.add(kickDir);
-						sun.setLocalLocation(newBallPos);
-
-						System.out.println("Ball Kicked!");
-						break;
-					}
-				}
 			}
 		}
 		super.keyPressed(e);
@@ -540,11 +606,11 @@ public class MyGame extends VariableFrameRateGame {
 	// ---------- NETWORKING SECTION ----------------
 
 	public ObjShape getGhostShape() {
-		return ghostS;
+		return person.getShape();
 	}
 
 	public TextureImage getGhostTexture() {
-		return ghostT;
+		return person.getTextureImage();
 	}
 
 	public ObjShape getNPCshape() {
