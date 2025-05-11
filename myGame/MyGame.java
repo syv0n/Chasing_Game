@@ -39,7 +39,7 @@ public class MyGame extends VariableFrameRateGame {
 	private GhostManager gm;
 
 	private IAudioManager audioMgr;
-	private Sound sunSound;
+	private Sound ballS1, ballS2, ballS3, GameMusic;
 
 	private int counter = 0;
 	private Vector3f currentPosition;
@@ -50,7 +50,7 @@ public class MyGame extends VariableFrameRateGame {
 
 	private GameObject lava, dragon, person, plane, box1, box2, box3 , ball1, ball2, ball3;
 	private ObjShape ghostS, lavaS, dragonS, npcS, planeS, BoxS, sphS;
-	private TextureImage ghostT, lavatx, heightmap, dragontx, persontx, npctx, groundtx;
+	private TextureImage ghostT, lavatx, heightmap, dragontx, persontx, npctx, groundtx, Box1, Box2, Box3, Ball1, Ball2, Ball3;
 	private Light light1, ballLight1, ballLight2, ballLight3;
 	private AnimatedShape personS;
 
@@ -130,6 +130,13 @@ public class MyGame extends VariableFrameRateGame {
 
 		ghostT = new TextureImage("redDolphin.jpg");
 		npctx = new TextureImage("redDolphin.jpg");
+
+		Box1 = new TextureImage("slime.jiggle.png");
+		Box2 = new TextureImage("Chest.png");
+		Box3 = new TextureImage("MagentaGoal.png");
+		Ball1 = new TextureImage("Blue.png");
+		Ball2 = new TextureImage("Brown.png");
+		Ball3 = new TextureImage("Magenta.png");
 	}
 
 	@Override
@@ -170,37 +177,37 @@ public class MyGame extends VariableFrameRateGame {
 		plane.getRenderStates().hasDepthTesting(true);
 		plane.getRenderStates().setColor(new Vector3f(1,1,1));
 
-		box1 = new GameObject(GameObject.root(), BoxS);
+		box1 = new GameObject(GameObject.root(), BoxS, Box1);
 		initialTranslation = (new Matrix4f()).translation(7, 1, 7);
 		initialScale = (new Matrix4f()).scaling(1.0f);
 		box1.setLocalTranslation(initialTranslation);
 		box1.setLocalScale(initialScale);
 
-		box2 = new GameObject(GameObject.root(), BoxS);
+		box2 = new GameObject(GameObject.root(), BoxS, Box2);
 		initialTranslation = (new Matrix4f()).translation(-7, 1, -7);
 		initialScale = (new Matrix4f()).scaling(1.0f);
 		box2.setLocalTranslation(initialTranslation);
 		box2.setLocalScale(initialScale);
 
-		box3 = new GameObject(GameObject.root(), BoxS);
+		box3 = new GameObject(GameObject.root(), BoxS, Box3);
 		initialTranslation = (new Matrix4f()).translation(3, 1, -7);
 		initialScale = (new Matrix4f()).scaling(1.0f);
 		box3.setLocalTranslation(initialTranslation);
 		box3.setLocalScale(initialScale);
 
-		ball1 = new GameObject(GameObject.root(), sphS);
+		ball1 = new GameObject(GameObject.root(), sphS, Ball1);
 		initialTranslation = (new Matrix4f()).translation(5, 2, 3);
 		initialScale = (new Matrix4f()).scaling(0.5f);
 		ball1.setLocalTranslation(initialTranslation);
 		ball1.setLocalScale(initialScale);
 
-		ball2 = new GameObject(GameObject.root(), sphS);
+		ball2 = new GameObject(GameObject.root(), sphS, Ball2);
 		initialTranslation = (new Matrix4f()).translation(-5, 2, 3);
 		initialScale = (new Matrix4f()).scaling(0.5f);
 		ball2.setLocalTranslation(initialTranslation);
 		ball2.setLocalScale(initialScale);
 
-		ball3 = new GameObject(GameObject.root(), sphS);
+		ball3 = new GameObject(GameObject.root(), sphS, Ball3);
 		initialTranslation = (new Matrix4f()).translation(-7, 2, 4);
 		initialScale = (new Matrix4f()).scaling(0.5f);
 		ball3.setLocalTranslation(initialTranslation);
@@ -253,17 +260,36 @@ public class MyGame extends VariableFrameRateGame {
 
 	@Override
 	public void loadSounds() {
-		AudioResource resource = null;
-		audioMgr = engine.getAudioManager();
-		resource = audioMgr.createAudioResource("lava.wav", AudioResourceType.AUDIO_SAMPLE);
+		AudioResource Goal1 = null;
+		AudioResource Goal2 = null;
 
-		/*
-		sunSound = new Sound(resource, SoundType.SOUND_EFFECT, 100, true);
-		sunSound.initialize(audioMgr);
-		sunSound.setMaxDistance(10.0f);
-		sunSound.setMinDistance(0.5f);
-		sunSound.setRollOff(5.0f);
-		*/
+		audioMgr = engine.getAudioManager();
+		Goal1 = audioMgr.createAudioResource("Victory!.wav", AudioResourceType.AUDIO_SAMPLE);
+		Goal2 = audioMgr.createAudioResource("Game-Music.wav", AudioResourceType.AUDIO_STREAM);
+
+
+		ballS1 = new Sound(Goal1, SoundType.SOUND_EFFECT, 100, true);
+		ballS1.initialize(audioMgr);
+		ballS1.setMaxDistance(10.0f);
+		ballS1.setMinDistance(0.5f);
+		ballS1.setRollOff(5.0f);
+
+		ballS2 = new Sound(Goal1, SoundType.SOUND_EFFECT, 100, true);
+		ballS2.initialize(audioMgr);
+		ballS2.setMaxDistance(10.0f);
+		ballS2.setMinDistance(0.5f);
+		ballS2.setRollOff(5.0f);
+
+		ballS3 = new Sound(Goal1, SoundType.SOUND_EFFECT, 100, true);
+		ballS3.initialize(audioMgr);
+		ballS3.setMaxDistance(10.0f);
+		ballS3.setMinDistance(0.5f);
+		ballS3.setRollOff(5.0f);
+
+		GameMusic = new Sound(Goal2, SoundType.SOUND_MUSIC, 10, true);
+		GameMusic.initialize(audioMgr);
+		GameMusic.play();
+
 	}
 
 	@Override
@@ -274,9 +300,10 @@ public class MyGame extends VariableFrameRateGame {
 		(engine.getRenderSystem()).setWindowDimensions(1900, 1000);
 
 		// Initial sound settings
-		//sunSound.setLocation(sun.getWorldLocation());
-		//setEarPerimeters();
-		//sunSound.play();
+		ballS1.setLocation(box1.getWorldLocation());
+		ballS2.setLocation(box2.getWorldLocation());
+		ballS3.setLocation(box3.getWorldLocation());
+		setEarPerimeters();
 
 		// ------------- positioning the camera -------------
 		//(engine.getRenderSystem().getViewport("MAIN").getCamera()).setLocation(new Vector3f(0, 0, 5));
@@ -378,7 +405,7 @@ public class MyGame extends VariableFrameRateGame {
 	public void update() {
 
 		//sunSound.setLocation(sun.getWorldLocation());
-		//setEarPerimeters();
+		setEarPerimeters();
 
 		elapsTime = System.currentTimeMillis() - lastFrameTime;
 		lastFrameTime = System.currentTimeMillis();
@@ -418,7 +445,7 @@ public class MyGame extends VariableFrameRateGame {
 					float z = mat.m32();
 
 					// Terrain height at the ball's XZ position
-					float desiredHeight = lava.getHeight(x, z) + 0.75f;
+					float desiredHeight = lava.getHeight(x, z) + 0.30f;
 					float diff = desiredHeight - y;
 
 					// Get vertical velocity component from velocity array
@@ -458,6 +485,7 @@ public class MyGame extends VariableFrameRateGame {
 			if (Goal1){
 				Goal1 = false;
 				score++;
+				ballS1.play();
 			}
 		}
 
@@ -471,6 +499,7 @@ public class MyGame extends VariableFrameRateGame {
 			if (Goal2){
 				Goal2 = false;
 				score++;
+				ballS2.play();
 			}
 		}
 
@@ -484,6 +513,7 @@ public class MyGame extends VariableFrameRateGame {
 			if (Goal3) {
 				Goal3 = false;
 				score++;
+				ballS3.play();
 			}
 		}
 
