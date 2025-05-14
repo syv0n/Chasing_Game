@@ -111,7 +111,7 @@ public class MyGame extends VariableFrameRateGame {
 		sphS = new Sphere();
 
 		ghostS = new Sphere();
-		npcS = new Cube();
+		npcS = new ImportedModel("DragonFolk.obj");
 	}
 
 	@Override
@@ -129,7 +129,7 @@ public class MyGame extends VariableFrameRateGame {
 		persontx = new TextureImage("person.png");
 
 		ghostT = new TextureImage("redDolphin.jpg");
-		npctx = new TextureImage("redDolphin.jpg");
+		npctx = new TextureImage("DragonFolk.png");
 
 		Box1 = new TextureImage("slime.jiggle.png");
 		Box2 = new TextureImage("Chest.png");
